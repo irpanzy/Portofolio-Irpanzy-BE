@@ -20,6 +20,8 @@ const projectSchema = new Schema<IProject>(
     techStack: [techStackItemSchema],
     order: { type: Number, default: 0 },
     isVisible: { type: Boolean, default: true },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: String, default: null },
   },
   {
     timestamps: true,
@@ -27,5 +29,6 @@ const projectSchema = new Schema<IProject>(
 );
 
 projectSchema.index({ order: 1 });
+projectSchema.index({ deletedAt: 1 });
 
 export const Project = mongoose.model<IProject>("Project", projectSchema);

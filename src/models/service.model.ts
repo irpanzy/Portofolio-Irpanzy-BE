@@ -8,6 +8,8 @@ const serviceSchema = new Schema<IService>(
     icon: { type: String, required: true },
     iconFileId: { type: String, required: true },
     order: { type: Number, default: 0 },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: String, default: null },
   },
   {
     timestamps: true,
@@ -15,5 +17,6 @@ const serviceSchema = new Schema<IService>(
 );
 
 serviceSchema.index({ order: 1 });
+serviceSchema.index({ deletedAt: 1 });
 
 export const Service = mongoose.model<IService>("Service", serviceSchema);

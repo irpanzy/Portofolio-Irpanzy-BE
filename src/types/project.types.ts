@@ -15,6 +15,8 @@ export interface IProject extends Document {
   techStack: ITechStackItem[];
   order: number;
   isVisible: boolean;
+  deletedAt: Date | null;
+  deletedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

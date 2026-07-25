@@ -12,6 +12,8 @@ const techStackSchema = new Schema<ITechStack>(
       default: "other",
     },
     order: { type: Number, default: 0 },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: String, default: null },
   },
   {
     timestamps: true,
@@ -19,6 +21,7 @@ const techStackSchema = new Schema<ITechStack>(
 );
 
 techStackSchema.index({ category: 1, order: 1 });
+techStackSchema.index({ deletedAt: 1 });
 
 export const TechStack = mongoose.model<ITechStack>(
   "TechStack",
