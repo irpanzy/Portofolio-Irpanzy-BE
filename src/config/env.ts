@@ -20,7 +20,9 @@ const envSchema = z.object({
   ADMIN_PASSWORD: z
     .string()
     .min(6, "ADMIN_PASSWORD must be at least 6 characters"),
-  FRONTEND_URL: z.string().optional(),
+  ALLOWED_ORIGINS: z
+    .string()
+    .transform((val) => val.split(",").map((origin) => origin.trim())),
 });
 
 type EnvSchema = z.infer<typeof envSchema>;
