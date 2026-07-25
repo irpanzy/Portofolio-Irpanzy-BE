@@ -9,6 +9,8 @@ export interface IExperience extends Document {
   logoFileId: string;
   responsibilities: string[];
   order: number;
+  deletedAt: Date | null;
+  deletedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

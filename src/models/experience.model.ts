@@ -11,6 +11,8 @@ const experienceSchema = new Schema<IExperience>(
     logoFileId: { type: String, required: true },
     responsibilities: [{ type: String }],
     order: { type: Number, default: 0 },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: String, default: null },
   },
   {
     timestamps: true,
@@ -18,6 +20,7 @@ const experienceSchema = new Schema<IExperience>(
 );
 
 experienceSchema.index({ order: 1 });
+experienceSchema.index({ deletedAt: 1 });
 
 export const Experience = mongoose.model<IExperience>(
   "Experience",

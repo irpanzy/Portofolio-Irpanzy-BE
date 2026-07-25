@@ -17,11 +17,20 @@ export interface OptimizedUrlOptions {
   focus?: "auto" | "center" | "top" | "left" | "bottom" | "right";
 }
 
+export enum UploadFolder {
+  PROJECTS = "/portfolio/projects",
+  EXPERIENCES = "/portfolio/experiences",
+  SERVICES = "/portfolio/services",
+  TECHSTACKS = "/portfolio/techstacks",
+  ABOUT = "/portfolio/about",
+  GENERAL = "/portfolio",
+}
+
 export class ImageKitService {
   async upload(
     file: Buffer,
     fileName: string,
-    folder: string = "/portfolio"
+    folder: string = UploadFolder.GENERAL
   ): Promise<UploadResult> {
     try {
       const response = await imagekit.upload({
@@ -46,14 +55,14 @@ export class ImageKitService {
 
   async uploadFromMulter(
     file: Express.Multer.File,
-    folder: string = "/portfolio"
+    folder: string = UploadFolder.GENERAL
   ): Promise<UploadResult> {
     return this.upload(file.buffer, file.originalname, folder);
   }
 
   async uploadMultiple(
     files: Buffer[] | Express.Multer.File[],
-    folder: string = "/portfolio"
+    folder: string = UploadFolder.GENERAL
   ): Promise<UploadResult[]> {
     const uploadPromises = files.map((file) => {
       if (Buffer.isBuffer(file)) {
@@ -151,7 +160,7 @@ export class ImageKitService {
     }
   }
 
-  async listFiles(folder: string = "/portfolio", limit: number = 100) {
+  async listFiles(folder: string = UploadFolder.GENERAL, limit: number = 100) {
     try {
       return await imagekit.listFiles({
         path: folder,
@@ -168,6 +177,53 @@ export class ImageKitService {
     } catch (error: any) {
       console.error("ImageKit purge cache error:", error);
       throw new ApiError(500, `Failed to purge cache: ${error.message}`);
+    }
+  }
+
+  async createFolder(
+    folderName: string,
+    parentFolderPath: string = "/"
+  ): Promise<void> {
+    try {
+      await imagekit.createFolder({
+        folderName,
+        parentFolderPath,
+      });
+    } catch (error: any) {
+      if (!error.message?.includes("already exists")) {
+        console.error("ImageKit create folder error:", error);
+        throw new ApiError(500, `Failed to create folder: ${error.message}`);
+      }
+    }
+  }
+
+  /**
+   * Initialize all portfolio folders in ImageKit
+   * This creates the entire folder structure if it doesn't exist
+   * Safe to call multiple times - will skip existing folders
+   */
+  async initializePortfolioFolders(): Promise<void> {
+    const folders = [
+      { name: "portfolio", parent: "/" },
+      { name: "projects", parent: "/portfolio" },
+      { name: "experiences", parent: "/portfolio" },
+      { name: "services", parent: "/portfolio" },
+      { name: "techstacks", parent: "/portfolio" },
+      { name: "about", parent: "/portfolio" },
+    ];
+
+    for (const folder of folders) {
+      try {
+        await this.createFolder(folder.name, folder.parent);
+        console.log(
+          `✓ Folder created/verified: ${folder.parent}/${folder.name}`
+        );
+      } catch (error: any) {
+        console.error(
+          `✗ Failed to create folder ${folder.parent}/${folder.name}:`,
+          error.message
+        );
+      }
     }
   }
 }

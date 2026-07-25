@@ -6,6 +6,8 @@ export interface IService extends Document {
   icon: string;
   iconFileId: string;
   order: number;
+  deletedAt: Date | null;
+  deletedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

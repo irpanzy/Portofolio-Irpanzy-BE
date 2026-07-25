@@ -6,6 +6,8 @@ export interface ITechStack extends Document {
   iconFileId: string;
   category: "frontend" | "backend" | "database" | "tools" | "other";
   order: number;
+  deletedAt: Date | null;
+  deletedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
