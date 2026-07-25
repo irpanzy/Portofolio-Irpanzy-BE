@@ -1,17 +1,26 @@
 import express, { Application } from "express";
-import cors from "cors";
+import helmet from "helmet";
 import { env, connectDatabase } from "./config";
 import { errorHandler, notFound } from "./middleware/error.middleware";
+import { logger } from "./middleware/logger.middleware";
+import { corsMiddleware } from "./middleware/cors.middleware";
+import { sanitizeMongo, sanitizeInput } from "./middleware/sanitize.middleware";
+import { router } from "./routes";
 
 const app: Application = express();
 
-// Middleware
-app.use(cors());
+app.use(helmet());
+app.use(corsMiddleware);
+
+app.use(logger);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
-app.get("/health", (req, res) => {
+app.use(sanitizeMongo);
+app.use(sanitizeInput);
+
+app.get("/health", (_req, res) => {
   res.json({
     status: "ok",
     message: "Portfolio API is running",
@@ -19,20 +28,15 @@ app.get("/health", (req, res) => {
   });
 });
 
-// API Routes (will be added later)
-// app.use('/api', routes);
+app.use("/api", router);
 
-// Error handling
 app.use(notFound);
 app.use(errorHandler);
 
-// Start server
 const startServer = async () => {
   try {
-    // Connect to database
     await connectDatabase();
 
-    // Start listening
     const PORT = parseInt(env.PORT);
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
@@ -47,4 +51,4 @@ const startServer = async () => {
 
 startServer();
 
-export default app;
+export { app };
