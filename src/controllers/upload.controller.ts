@@ -32,6 +32,9 @@ export const uploadMultiple = asyncHandler(
 
 export const deleteFile = asyncHandler(async (req: Request, res: Response) => {
   const { fileId } = req.params;
+  if (typeof fileId !== "string") {
+    throw new ApiError(400, "Invalid fileId");
+  }
   await imagekitService.delete(fileId);
   res.json(new ApiResponse(200, "File deleted successfully", { fileId }));
 });
