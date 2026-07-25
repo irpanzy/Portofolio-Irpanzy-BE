@@ -23,3 +23,8 @@ uploadRouter.get(
   authenticate,
   uploadController.getOptimizedUrl
 );
+uploadRouter.post(
+  "/initialize-folders",
+  authenticate,
+  uploadController.initializeFolders
+);

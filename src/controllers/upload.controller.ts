@@ -1,17 +1,29 @@
 import { Request, Response } from "express";
-import { imagekitService } from "../services";
+import { imagekitService, UploadFolder } from "../services";
 import { asyncHandler, ApiResponse, ApiError } from "../utils";
 
 export const uploadSingle = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.file) throw new ApiError(400, "No file uploaded");
 
-    const folder = (req.body.folder as string) || "/portfolio";
+    // Accept folder category from request body, default to GENERAL
+    const folderCategory = req.body.category as
+      keyof typeof UploadFolder | undefined;
+    const folder =
+      folderCategory && UploadFolder[folderCategory]
+        ? UploadFolder[folderCategory]
+        : UploadFolder.GENERAL;
+
     const result = await imagekitService.uploadFromMulter(req.file, folder);
 
     res
       .status(201)
-      .json(new ApiResponse(201, "File uploaded successfully", result));
+      .json(
+        new ApiResponse(201, "File uploaded successfully", {
+          ...result,
+          folder,
+        })
+      );
   }
 );
 
@@ -21,12 +33,21 @@ export const uploadMultiple = asyncHandler(
       throw new ApiError(400, "No files uploaded");
     }
 
-    const folder = (req.body.folder as string) || "/portfolio";
+    // Accept folder category from request body, default to GENERAL
+    const folderCategory = req.body.category as
+      keyof typeof UploadFolder | undefined;
+    const folder =
+      folderCategory && UploadFolder[folderCategory]
+        ? UploadFolder[folderCategory]
+        : UploadFolder.GENERAL;
+
     const results = await imagekitService.uploadMultiple(req.files, folder);
 
     res
       .status(201)
-      .json(new ApiResponse(201, "Files uploaded successfully", results));
+      .json(
+        new ApiResponse(201, "Files uploaded successfully", { results, folder })
+      );
   }
 );
 
@@ -51,5 +72,20 @@ export const getOptimizedUrl = asyncHandler(
 
     const url = imagekitService.getOptimizedUrl(path, options);
     res.json(new ApiResponse(200, "Optimized URL generated", { url }));
+  }
+);
+
+export const initializeFolders = asyncHandler(
+  async (_req: Request, res: Response) => {
+    await imagekitService.initializePortfolioFolders();
+    res.json(
+      new ApiResponse(
+        200,
+        "Portfolio folder structure initialized successfully",
+        {
+          folders: Object.values(UploadFolder),
+        }
+      )
+    );
   }
 );
