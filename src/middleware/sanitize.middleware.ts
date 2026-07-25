@@ -15,9 +15,9 @@ export const sanitizeInput = (
 ) => {
   const sanitizeString = (str: string): string => {
     return str
-      .replace(/[<>]/g, "") 
+      .replace(/[<>]/g, "")
       .replace(/javascript:/gi, "")
-      .replace(/on\w+\s*=/gi, ""); 
+      .replace(/on\w+\s*=/gi, "");
   };
 
   const sanitizeObject = (obj: any): any => {
