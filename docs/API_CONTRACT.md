@@ -93,9 +93,9 @@ Login admin user and get JWT token.
 
 **POST** `/api/auth/refresh`
 
-Get new access token using refresh token.
+Get new access token and refresh token using old refresh token.
 
-**Rate Limit**: 5 req/15min
+**Rate Limit**: None (public endpoint, no auth middleware)
 
 **Request Body:**
 
@@ -112,10 +112,20 @@ Get new access token using refresh token.
   "statusCode": 200,
   "message": "Token refreshed successfully",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "admin": {
+      "email": "admin@example.com"
+    }
   }
 }
 ```
+
+**Errors:**
+
+- `401`: Refresh token is required
+- `401`: Invalid or expired refresh token
+- `404`: Admin not found
 
 ---
 
