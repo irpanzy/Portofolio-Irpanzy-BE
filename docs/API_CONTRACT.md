@@ -666,80 +666,161 @@ Same CRUD + soft delete pattern as Projects.
 
 ## 6. About (`/api/about`)
 
+> **Note**: About is a singleton resource (only one document exists). The PUT endpoint uses **upsert pattern** - it creates if not exists, updates if exists.
+
 ### 6.1 Get About
 
 **GET** `/api/about`
 
 Get about information (single document).
 
-**Response (200):**
+**Response (200) - When data exists:**
 
 ```json
 {
   "statusCode": 200,
-  "message": "About retrieved successfully",
+  "message": "About retrieved",
   "data": {
     "_id": "507f1f77bcf86cd799439011",
-    "name": "John Doe",
-    "title": "Full Stack Developer",
-    "bio": "Passionate developer...",
-    "profileImage": "https://ik.imagekit.io/...",
-    "email": "john@example.com",
-    "phone": "+1234567890",
-    "location": "San Francisco, CA",
-    "socialLinks": {
-      "github": "https://github.com/johndoe",
-      "linkedin": "https://linkedin.com/in/johndoe",
-      "twitter": "https://twitter.com/johndoe"
-    },
-    "resume": "https://ik.imagekit.io/...",
-    "skills": ["JavaScript", "React", "Node.js"]
+    "bio": "Full Stack Developer with 3+ years of experience...",
+    "profileImage": "https://ik.imagekit.io/1yelpitcv/irpanzy/profile.jpg",
+    "profileImageFileId": "file_abc123",
+    "heroTitle": "Hi, I'm Irfan Muria",
+    "heroSubtitle": "Full Stack Developer & Software Engineering Student",
+    "heroDescription": "Building scalable web applications with modern technologies",
+    "resumeLink": "https://drive.google.com/file/d/1234567890/view",
+    "infoList": [
+      {
+        "icon": "🎓",
+        "iconDark": "🎓",
+        "title": "Education",
+        "description": "Telkom University Purwokerto - Software Engineering"
+      },
+      {
+        "icon": "💼",
+        "iconDark": "💼",
+        "title": "Experience",
+        "description": "3+ Years in Web Development"
+      }
+    ],
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-15T00:00:00.000Z"
   }
 }
 ```
 
----
-
-### 6.2 Update About
-
-**PUT** `/api/about`
-
-Update about information.
-
-**Authentication**: Required
-
-**Request Body:** (all fields optional)
-
-```json
-{
-  "name": "John Doe",
-  "title": "Full Stack Developer",
-  "bio": "Passionate developer...",
-  "profileImage": "https://ik.imagekit.io/...",
-  "email": "john@example.com",
-  "phone": "+1234567890",
-  "location": "San Francisco, CA",
-  "socialLinks": {
-    "github": "https://github.com/johndoe",
-    "linkedin": "https://linkedin.com/in/johndoe"
-  },
-  "skills": ["JavaScript", "React"]
-}
-```
-
-**Response (200):**
+**Response (200) - When no data exists:**
 
 ```json
 {
   "statusCode": 200,
-  "message": "About updated successfully",
+  "message": "No about data yet",
+  "data": null
+}
+```
+
+> Frontend should check if `data === null` to determine if About data needs to be created.
+
+---
+
+### 6.2 Create or Update About (Upsert)
+
+**PUT** `/api/about`
+
+Create new about data (first time) or update existing data.
+
+**Authentication**: Required
+
+**Request Body:** (all fields required)
+
+```json
+{
+  "bio": "Full Stack Developer with 3+ years of experience building web applications. Passionate about clean code and user experience.",
+  "profileImage": "https://ik.imagekit.io/1yelpitcv/irpanzy/profile.jpg",
+  "profileImageFileId": "file_abc123",
+  "heroTitle": "Hi, I'm Irfan Muria",
+  "heroSubtitle": "Full Stack Developer & Software Engineering Student",
+  "heroDescription": "Building scalable web applications with modern technologies",
+  "resumeLink": "https://drive.google.com/file/d/1234567890/view",
+  "infoList": [
+    {
+      "icon": "🎓",
+      "iconDark": "🎓",
+      "title": "Education",
+      "description": "Telkom University Purwokerto - Software Engineering"
+    },
+    {
+      "icon": "💼",
+      "iconDark": "💼",
+      "title": "Experience",
+      "description": "3+ Years in Web Development"
+    },
+    {
+      "icon": "🌍",
+      "iconDark": "🌍",
+      "title": "Languages",
+      "description": "Indonesian, English"
+    }
+  ]
+}
+```
+
+**Validation Rules:**
+
+- `bio`: String, required, min 10 characters
+- `profileImage`: String, required, valid URL
+- `profileImageFileId`: String, required (from ImageKit upload)
+- `heroTitle`: String, required, min 3 characters
+- `heroSubtitle`: String, required, min 3 characters
+- `heroDescription`: String, required, min 10 characters
+- `resumeLink`: String, required, valid URL
+- `infoList`: Array, required, min 1 item, each item must have:
+  - `icon`: String, required
+  - `iconDark`: String, required
+  - `title`: String, required
+  - `description`: String, required
+
+**Response (201) - First time creation:**
+
+```json
+{
+  "statusCode": 201,
+  "message": "About data created successfully",
   "data": {
     "_id": "507f1f77bcf86cd799439011",
-    "name": "John Doe",
+    "bio": "Full Stack Developer...",
+    "profileImage": "https://ik.imagekit.io/...",
+    "heroTitle": "Hi, I'm Irfan Muria",
     ...
   }
 }
 ```
+
+**Response (200) - Update existing:**
+
+```json
+{
+  "statusCode": 200,
+  "message": "About data updated successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "bio": "Updated bio...",
+    "profileImage": "https://ik.imagekit.io/...",
+    ...
+  }
+}
+```
+
+**Errors:**
+
+- `400`: Validation failed (missing or invalid fields)
+- `401`: Unauthorized (missing or invalid token)
+
+**Example Workflow:**
+
+1. **Check if data exists**: `GET /api/about`
+2. **Upload profile image**: `POST /api/upload/single` with `category=ABOUT`
+3. **Create/Update about**: `PUT /api/about` with form data including image URL and fileId from step 2
 
 ---
 
