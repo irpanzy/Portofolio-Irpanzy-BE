@@ -6,7 +6,6 @@ export const uploadSingle = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.file) throw new ApiError(400, "No file uploaded");
 
-    // Accept folder category from request body, default to GENERAL
     const folderCategory = req.body.category as
       keyof typeof UploadFolder | undefined;
     const folder =
@@ -16,14 +15,12 @@ export const uploadSingle = asyncHandler(
 
     const result = await imagekitService.uploadFromMulter(req.file, folder);
 
-    res
-      .status(201)
-      .json(
-        new ApiResponse(201, "File uploaded successfully", {
-          ...result,
-          folder,
-        })
-      );
+    res.status(201).json(
+      new ApiResponse(201, "File uploaded successfully", {
+        ...result,
+        folder,
+      })
+    );
   }
 );
 
@@ -33,7 +30,6 @@ export const uploadMultiple = asyncHandler(
       throw new ApiError(400, "No files uploaded");
     }
 
-    // Accept folder category from request body, default to GENERAL
     const folderCategory = req.body.category as
       keyof typeof UploadFolder | undefined;
     const folder =
