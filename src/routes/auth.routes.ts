@@ -11,6 +11,6 @@ authRouter.post(
   validateBody(loginSchema),
   authController.login
 );
-authRouter.post("/refresh", authenticate, authController.refreshToken);
+authRouter.post("/refresh", authController.refreshToken);
 authRouter.get("/profile", authenticate, authController.getProfile);
 authRouter.put("/password", authenticate, authController.updatePassword);

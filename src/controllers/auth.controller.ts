@@ -9,14 +9,15 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
 export const refreshToken = asyncHandler(
   async (req: Request, res: Response) => {
-    const token = req.headers.authorization?.substring(7);
-    if (!token) {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
       return res
         .status(401)
-        .json(new ApiResponse(401, "No token provided", null));
+        .json(new ApiResponse(401, "Refresh token is required", null));
     }
 
-    const result = await authService.refreshToken(token);
+    const result = await authService.refreshToken(refreshToken);
     res.json(new ApiResponse(200, "Token refreshed", result));
   }
 );

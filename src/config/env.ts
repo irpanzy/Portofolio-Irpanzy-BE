@@ -16,6 +16,10 @@ const envSchema = z.object({
   GEMINI_API_KEY: z.string().min(1, "GEMINI_API_KEY is required"),
   JWT_SECRET: z.string().min(20, "JWT_SECRET must be at least 20 characters"),
   JWT_EXPIRES_IN: z.string(),
+  JWT_REFRESH_SECRET: z
+    .string()
+    .min(20, "JWT_REFRESH_SECRET must be at least 20 characters"),
+  JWT_REFRESH_EXPIRES_IN: z.string(),
   ADMIN_EMAIL: z.string().email("ADMIN_EMAIL must be a valid email"),
   ADMIN_PASSWORD: z
     .string()

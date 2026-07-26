@@ -21,13 +21,17 @@ export class AuthService {
       throw new ApiError(401, "Invalid email or password");
     }
 
-    const token = this.generateToken({
+    const payload = {
       id: admin._id.toString(),
       email: admin.email,
-    });
+    };
+
+    const token = this.generateToken(payload);
+    const refreshToken = this.generateRefreshToken(payload);
 
     return {
       token,
+      refreshToken,
       admin: {
         email: admin.email,
       },
@@ -37,6 +41,12 @@ export class AuthService {
   generateToken(payload: JWTPayload): string {
     return jwt.sign(payload, env.JWT_SECRET, {
       expiresIn: env.JWT_EXPIRES_IN,
+    } as jwt.SignOptions);
+  }
+
+  generateRefreshToken(payload: JWTPayload): string {
+    return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
+      expiresIn: env.JWT_REFRESH_EXPIRES_IN,
     } as jwt.SignOptions);
   }
 
@@ -50,6 +60,19 @@ export class AuthService {
         throw new ApiError(401, "Invalid token");
       }
       throw new ApiError(401, "Token verification failed");
+    }
+  }
+
+  verifyRefreshToken(token: string): JWTPayload {
+    try {
+      return jwt.verify(token, env.JWT_REFRESH_SECRET) as JWTPayload;
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new ApiError(401, "Refresh token expired");
+      } else if (error instanceof jwt.JsonWebTokenError) {
+        throw new ApiError(401, "Invalid refresh token");
+      }
+      throw new ApiError(401, "Refresh token verification failed");
     }
   }
 
@@ -120,8 +143,8 @@ export class AuthService {
     };
   }
 
-  async refreshToken(oldToken: string): Promise<AuthResponse> {
-    const decoded = this.verifyToken(oldToken);
+  async refreshToken(oldRefreshToken: string): Promise<AuthResponse> {
+    const decoded = this.verifyRefreshToken(oldRefreshToken);
 
     const admin = await Admin.findById(decoded.id);
 
@@ -129,13 +152,17 @@ export class AuthService {
       throw new ApiError(404, "Admin not found");
     }
 
-    const token = this.generateToken({
+    const payload = {
       id: admin._id.toString(),
       email: admin.email,
-    });
+    };
+
+    const token = this.generateToken(payload);
+    const refreshToken = this.generateRefreshToken(payload);
 
     return {
       token,
+      refreshToken,
       admin: {
         email: admin.email,
       },

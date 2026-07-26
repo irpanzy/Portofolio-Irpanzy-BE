@@ -15,6 +15,7 @@ export interface LoginDTO {
 
 export interface AuthResponse {
   token: string;
+  refreshToken: string;
   admin: {
     email: string;
   };
