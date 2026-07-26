@@ -147,7 +147,20 @@ Authorization: Bearer <your_jwt_token>
 
 ## 📚 API Documentation
 
-Dokumentasi lengkap tersedia di `docs/API_CONTRACT.md` atau import Postman collection dari `docs/postman_collection.json`.
+**Complete API Documentation:** `docs/API_CONTRACT.md`
+
+Dokumentasi lengkap berisi:
+
+- All 50+ endpoints dengan request/response examples
+- Authentication flow
+- Error handling
+- Rate limiting
+- Validation rules
+
+**Testing API:**
+
+- Gunakan Postman, Thunder Client, atau HTTP client lainnya
+- Lihat dokumentasi lengkap di `docs/API_CONTRACT.md`
 
 ### Base URL
 
@@ -258,12 +271,71 @@ Setiap entity memiliki 8 actions:
 }
 ```
 
-## 🧪 Testing dengan Postman
+## 🧪 Testing API
 
-1. Import collection dari `docs/postman_collection.json`
-2. Set environment variable `baseUrl` ke `http://localhost:8000/api`
-3. Run "Login" request untuk mendapatkan token
-4. Token akan otomatis tersimpan dan digunakan untuk request lainnya
+### Quick Start dengan cURL
+
+**1. Login untuk mendapatkan token:**
+
+```bash
+curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "irfanmuria04@gmail.com",
+    "password": "Irfanmuria85!"
+  }'
+```
+
+Response akan berisi `accessToken` dan `refreshToken`.
+
+**2. Test Public Endpoints (tanpa auth):**
+
+```bash
+# Get all projects
+curl http://localhost:8000/api/projects
+
+# Get all experiences
+curl http://localhost:8000/api/experiences
+
+# Chat with AI
+curl -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What technologies does Irfan use?"}'
+```
+
+**3. Test Admin Endpoints (dengan auth):**
+
+```bash
+# Create project
+curl -X POST http://localhost:8000/api/projects \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{
+    "title": "My Project",
+    "description": "Project description",
+    "techStack": ["React", "Node.js"],
+    "order": 1,
+    "isVisible": true
+  }'
+```
+
+**4. Refresh Token (when expired):**
+
+```bash
+curl -X POST http://localhost:8000/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken": "YOUR_REFRESH_TOKEN"}'
+```
+
+### Testing dengan Postman/Thunder Client
+
+1. **Set Base URL**: `http://localhost:8000/api`
+2. **Login**: POST `/auth/login` dengan credentials dari `.env`
+3. **Copy Access Token** dari response
+4. **Set Authorization**: Type "Bearer Token", paste access token
+5. **Test Endpoints**: Lihat `docs/API_CONTRACT.md` untuk semua endpoints
+
+---
 
 ## 🌐 Frontend Integration
 
