@@ -9,10 +9,10 @@ export interface IProject extends Document {
   title: string;
   description: string;
   bgImage: string;
-  bgImageFileId: string;
+  bgImageFileId?: string; // Make optional
   demoLink: string;
   githubLink: string;
-  techStack: ITechStackItem[];
+  techStack: string[] | ITechStackItem[];
   order: number;
   isVisible: boolean;
   deletedAt: Date | null;
@@ -24,9 +24,11 @@ export interface IProject extends Document {
 export interface CreateProjectDTO {
   title: string;
   description: string;
+  bgImage?: string;
+  bgImageFileId?: string;
   demoLink?: string;
   githubLink?: string;
-  techStack: ITechStackItem[];
+  techStack: string[] | ITechStackItem[]; // Support both formats
   order?: number;
   isVisible?: boolean;
 }
@@ -34,9 +36,11 @@ export interface CreateProjectDTO {
 export interface UpdateProjectDTO {
   title?: string;
   description?: string;
+  bgImage?: string;
+  bgImageFileId?: string;
   demoLink?: string;
   githubLink?: string;
-  techStack?: ITechStackItem[];
+  techStack?: string[] | ITechStackItem[]; // Support both formats
   order?: number;
   isVisible?: boolean;
 }

@@ -8,6 +8,7 @@ const techStackItemSchema = z.object({
 export const createProjectSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
+  bgImage: z.string().optional(),
   demoLink: z
     .string()
     .url("Demo link must be a valid URL")
@@ -18,9 +19,15 @@ export const createProjectSchema = z.object({
     .url("GitHub link must be a valid URL")
     .optional()
     .or(z.literal("")),
+  // Support both string array (for simple tech names) and object array (with icons)
   techStack: z
-    .array(techStackItemSchema)
-    .min(1, "At least one tech stack item is required"),
+    .union([
+      z.array(z.string().min(1, "Tech stack item cannot be empty")),
+      z.array(techStackItemSchema),
+    ])
+    .refine((arr) => arr.length > 0, {
+      message: "At least one tech stack item is required",
+    }),
   order: z.number().int().nonnegative().optional(),
   isVisible: z.boolean().optional(),
 });
@@ -28,6 +35,7 @@ export const createProjectSchema = z.object({
 export const updateProjectSchema = z.object({
   title: z.string().min(1, "Title is required").optional(),
   description: z.string().min(1, "Description is required").optional(),
+  bgImage: z.string().optional(),
   demoLink: z
     .string()
     .url("Demo link must be a valid URL")
@@ -39,8 +47,13 @@ export const updateProjectSchema = z.object({
     .optional()
     .or(z.literal("")),
   techStack: z
-    .array(techStackItemSchema)
-    .min(1, "At least one tech stack item is required")
+    .union([
+      z.array(z.string().min(1, "Tech stack item cannot be empty")),
+      z.array(techStackItemSchema),
+    ])
+    .refine((arr) => arr.length > 0, {
+      message: "At least one tech stack item is required",
+    })
     .optional(),
   order: z.number().int().nonnegative().optional(),
   isVisible: z.boolean().optional(),

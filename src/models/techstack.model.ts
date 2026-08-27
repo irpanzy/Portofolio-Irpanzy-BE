@@ -4,8 +4,8 @@ import { ITechStack } from "../types";
 const techStackSchema = new Schema<ITechStack>(
   {
     title: { type: String, required: true },
-    icon: { type: String, required: true },
-    iconFileId: { type: String, required: true },
+    icon: { type: String, required: false },
+    iconFileId: { type: String, required: false },
     category: {
       type: String,
       enum: ["frontend", "backend", "database", "tools", "other"],
