@@ -1,4 +1,5 @@
 export * as authController from "./auth.controller";
+export * as heroController from "./hero.controller";
 export * as projectController from "./project.controller";
 export * as experienceController from "./experience.controller";
 export * as serviceController from "./service.controller";

@@ -1,6 +1,7 @@
 export * from "./project.model";
 export * from "./experience.model";
 export * from "./service.model";
+export * from "./hero.model";
 export * from "./about.model";
 export * from "./techstack.model";
 export * from "./contact.model";

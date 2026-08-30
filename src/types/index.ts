@@ -2,6 +2,7 @@ export * from "./common.types";
 export * from "./project.types";
 export * from "./experience.types";
 export * from "./service.types";
+export * from "./hero.types";
 export * from "./about.types";
 export * from "./techstack.types";
 export * from "./contact.types";

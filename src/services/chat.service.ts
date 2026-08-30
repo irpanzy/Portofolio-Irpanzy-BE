@@ -1,6 +1,13 @@
 import { v4 as uuidv4 } from "uuid";
 import { getGeminiModel } from "../config";
-import { Project, Experience, About, TechStack, Service } from "../models";
+import {
+  Project,
+  Experience,
+  About,
+  TechStack,
+  Service,
+  Hero,
+} from "../models";
 import { ChatHistory } from "../models";
 import { IChatRequest, IChatResponse } from "../types";
 import { ApiError } from "../utils";
@@ -8,8 +15,9 @@ import { ApiError } from "../utils";
 export class ChatService {
   private async buildPortfolioContext(): Promise<string> {
     try {
-      const [about, projects, experiences, techStack, services] =
+      const [hero, about, projects, experiences, techStack, services] =
         await Promise.all([
+          Hero.findOne(),
           About.findOne(),
           Project.find({ isVisible: true }).sort({ order: 1 }),
           Experience.find().sort({ order: 1 }),
@@ -20,15 +28,15 @@ export class ChatService {
       const context = `
 === IRFAN MURIA PORTFOLIO DATA ===
 
-[ABOUT & PROFILE]
-${about?.bio || "No bio available"}
-Hero Title: ${about?.heroTitle || "N/A"}
-Hero Subtitle: ${about?.heroSubtitle || "N/A"}
-Hero Description: ${about?.heroDescription || "N/A"}
-Resume: ${about?.resumeLink || "N/A"}
+[HERO / PROFILE]
+Greeting: ${hero?.greeting || "N/A"}
+Title: ${hero?.title || "N/A"}
+Description: ${hero?.description || "N/A"}
+Resume: ${hero?.resumeLink || "N/A"}
 
-${about?.infoList && about.infoList.length > 0 ? "[INFO]" : ""}
-${about?.infoList?.map((info) => `${info.title}: ${info.description}`).join("\n") || ""}
+[ABOUT ME]
+${about?.bio || "No bio available"}
+${about?.summary ? `Summary: ${about.summary}` : ""}
 
 [WORK EXPERIENCE]
 ${experiences
@@ -58,14 +66,15 @@ ${projects
   .join("\n")}
 
 [TECHNICAL SKILLS]
-${techStack
-  .reduce((acc: any, tech) => {
+${Object.entries(
+  techStack.reduce((acc: any, tech) => {
     if (!acc[tech.category]) acc[tech.category] = [];
     acc[tech.category].push(tech.title);
     return acc;
   }, {})
+)
   .map(
-    (category: string, skills: string[]) => `${category}: ${skills.join(", ")}`
+    ([category, skills]) => `${category}: ${(skills as string[]).join(", ")}`
   )
   .join("\n")}
 
