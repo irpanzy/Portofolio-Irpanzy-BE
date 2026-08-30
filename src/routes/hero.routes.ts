@@ -6,7 +6,7 @@ import {
   upsertHero,
 } from "../controllers/hero.controller";
 import { authenticate } from "../middleware/auth.middleware";
-import { validate } from "../middleware/validation.middleware";
+import { validateBody } from "../middleware/validation.middleware";
 import {
   createHeroSchema,
   updateHeroSchema,
@@ -14,12 +14,10 @@ import {
 
 const router = Router();
 
-// Public route
 router.get("/", getHero);
 
-// Admin routes
-router.post("/", authenticate, validate(createHeroSchema), createHero);
-router.put("/", authenticate, validate(updateHeroSchema), updateHero);
-router.patch("/", authenticate, validate(updateHeroSchema), upsertHero); // Deprecated - for backward compatibility
+router.post("/", authenticate, validateBody(createHeroSchema), createHero);
+router.put("/", authenticate, validateBody(updateHeroSchema), updateHero);
+router.patch("/", authenticate, validateBody(updateHeroSchema), upsertHero);
 
 export default router;
