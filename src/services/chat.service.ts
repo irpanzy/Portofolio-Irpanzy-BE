@@ -35,8 +35,9 @@ ${experiences
   .map(
     (exp) => `
 - ${exp.position} at ${exp.company}
-  Period: ${exp.period}
+  Period: ${exp.startDate} - ${exp.current ? "Present" : exp.endDate || "N/A"}
   Location: ${exp.location}
+  Description: ${exp.description}
   Responsibilities:
 ${exp.responsibilities.map((r) => `    * ${r}`).join("\n")}
 `
@@ -49,7 +50,7 @@ ${projects
     (project) => `
 - ${project.title}
   Description: ${project.description}
-  Tech Stack: ${project.techStack.map((t) => t.title).join(", ")}
+  Tech Stack: ${project.techStack.map((t) => (typeof t === "string" ? t : t.title)).join(", ")}
   ${project.demoLink ? `Demo: ${project.demoLink}` : ""}
   ${project.githubLink ? `GitHub: ${project.githubLink}` : ""}
 `

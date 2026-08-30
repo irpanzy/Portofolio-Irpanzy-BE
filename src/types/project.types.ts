@@ -2,7 +2,7 @@ import { Document } from "mongoose";
 
 export interface ITechStackItem {
   title: string;
-  icon: string;
+  icon?: string; // Make icon optional
 }
 
 export interface IProject extends Document {
@@ -12,7 +12,7 @@ export interface IProject extends Document {
   bgImageFileId?: string; // Make optional
   demoLink: string;
   githubLink: string;
-  techStack: string[] | ITechStackItem[];
+  techStack: (string | ITechStackItem)[]; // Support mixed array
   order: number;
   isVisible: boolean;
   deletedAt: Date | null;
@@ -28,7 +28,7 @@ export interface CreateProjectDTO {
   bgImageFileId?: string;
   demoLink?: string;
   githubLink?: string;
-  techStack: string[] | ITechStackItem[]; // Support both formats
+  techStack: (string | ITechStackItem)[]; // Support mixed array
   order?: number;
   isVisible?: boolean;
 }
@@ -40,7 +40,7 @@ export interface UpdateProjectDTO {
   bgImageFileId?: string;
   demoLink?: string;
   githubLink?: string;
-  techStack?: string[] | ITechStackItem[]; // Support both formats
+  techStack?: (string | ITechStackItem)[]; // Support mixed array
   order?: number;
   isVisible?: boolean;
 }

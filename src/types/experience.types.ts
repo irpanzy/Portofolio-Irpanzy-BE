@@ -4,9 +4,12 @@ export interface IExperience extends Document {
   company: string;
   position: string;
   location: string;
-  period: string;
+  startDate: string;
+  endDate?: string;
+  current: boolean;
+  description: string;
   logo: string;
-  logoFileId: string;
+  logoFileId?: string;
   responsibilities: string[];
   order: number;
   deletedAt: Date | null;
@@ -19,7 +22,11 @@ export interface CreateExperienceDTO {
   company: string;
   position: string;
   location: string;
-  period: string;
+  startDate: string;
+  endDate?: string;
+  current: boolean;
+  description: string;
+  logo?: string;
   responsibilities: string[];
   order?: number;
 }
@@ -28,7 +35,11 @@ export interface UpdateExperienceDTO {
   company?: string;
   position?: string;
   location?: string;
-  period?: string;
+  startDate?: string;
+  endDate?: string;
+  current?: boolean;
+  description?: string;
+  logo?: string;
   responsibilities?: string[];
   order?: number;
 }
