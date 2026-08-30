@@ -1,5 +1,6 @@
 export * from "./project.validation";
 export * from "./experience.validation";
+export * from "./education.validation";
 export * from "./service.validation";
 export * from "./hero.validation";
 export * from "./about.validation";
