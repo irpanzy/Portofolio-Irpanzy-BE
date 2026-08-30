@@ -6,6 +6,7 @@ export const getTechStacks = asyncHandler(
   async (req: Request, res: Response) => {
     const { category } = req.query;
     const filter: any = { deletedAt: null };
+
     if (category) filter.category = category;
 
     const techStacks = await TechStack.find(filter).sort({

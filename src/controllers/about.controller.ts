@@ -1,33 +1,69 @@
 import { Request, Response } from "express";
 import { About } from "../models";
 import { asyncHandler, ApiResponse, ApiError } from "../utils";
+import {
+  createAboutSchema,
+  updateAboutSchema,
+} from "../validations/about.validation";
 
 export const getAbout = asyncHandler(async (req: Request, res: Response) => {
   const about = await About.findOne();
 
   if (!about) {
-    return res.json(new ApiResponse(200, "No about data yet", null));
+    throw new ApiError(404, "About data not found");
   }
 
-  res.json(new ApiResponse(200, "About retrieved", about));
+  res
+    .status(200)
+    .json(new ApiResponse(200, "About data retrieved successfully", about));
+});
+
+export const createAbout = asyncHandler(async (req: Request, res: Response) => {
+  const existingAbout = await About.findOne();
+
+  if (existingAbout) {
+    throw new ApiError(400, "About data already exists. Use PUT to update.");
+  }
+
+  const validatedData = createAboutSchema.parse(req.body);
+  const about = await About.create(validatedData);
+
+  res
+    .status(201)
+    .json(new ApiResponse(201, "About data created successfully", about));
 });
 
 export const updateAbout = asyncHandler(async (req: Request, res: Response) => {
-  let about = await About.findOne();
+  const validatedData = updateAboutSchema.parse(req.body);
+
+  const about = await About.findOne();
 
   if (!about) {
-    // First time create
-    about = await About.create(req.body);
-    return res
-      .status(201)
-      .json(new ApiResponse(201, "About data created successfully", about));
+    throw new ApiError(404, "About data not found. Use POST to create.");
   }
 
-  // Update existing
-  about = await About.findByIdAndUpdate(about._id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  Object.assign(about, validatedData);
+  await about.save();
 
-  res.json(new ApiResponse(200, "About data updated successfully", about));
+  res
+    .status(200)
+    .json(new ApiResponse(200, "About data updated successfully", about));
+});
+
+export const upsertAbout = asyncHandler(async (req: Request, res: Response) => {
+  const validatedData = updateAboutSchema.parse(req.body);
+
+  let about = await About.findOne();
+
+  if (about) {
+    Object.assign(about, validatedData);
+    await about.save();
+  } else {
+    const createData = createAboutSchema.parse(req.body);
+    about = await About.create(createData);
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "About data saved successfully", about));
 });

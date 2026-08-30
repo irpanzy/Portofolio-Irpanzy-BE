@@ -1,10 +1,20 @@
 import { Document } from "mongoose";
 
+export type TechCategory =
+  | "languages"
+  | "frontend"
+  | "backend"
+  | "mobile"
+  | "database"
+  | "devops_cloud"
+  | "tools";
+
 export interface ITechStack extends Document {
   title: string;
   icon?: string;
   iconFileId?: string;
-  category: "frontend" | "backend" | "database" | "tools" | "other";
+  category: TechCategory;
+  proficiencyLevel?: number | null;
   order: number;
   deletedAt: Date | null;
   deletedBy: string | null;
@@ -14,16 +24,18 @@ export interface ITechStack extends Document {
 
 export interface CreateTechStackDTO {
   title: string;
-  category: "frontend" | "backend" | "database" | "tools" | "other";
+  category: TechCategory;
   order?: number;
   icon?: string;
   iconFileId?: string;
+  proficiencyLevel?: number;
 }
 
 export interface UpdateTechStackDTO {
   title?: string;
-  category?: "frontend" | "backend" | "database" | "tools" | "other";
+  category?: TechCategory;
   order?: number;
   icon?: string;
   iconFileId?: string;
+  proficiencyLevel?: number;
 }
