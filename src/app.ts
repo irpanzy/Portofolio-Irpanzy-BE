@@ -20,6 +20,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(sanitizeMongo);
 app.use(sanitizeInput);
 
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDatabase();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/", (_req, res) => {
+  res.json({
+    status: "ok",
+    message: "Portfolio API is running",
+    version: "1.0.0",
+    docs: "/api",
+    health: "/health",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get("/health", (_req, res) => {
   res.json({
     status: "ok",
@@ -53,10 +73,5 @@ if (process.env.VERCEL !== "1") {
   startServer();
 }
 
-if (process.env.VERCEL === "1") {
-  connectDatabase().catch((error) => {
-    console.error("Failed to connect to database:", error);
-  });
-}
-
+export default app;
 export { app };
