@@ -1,0 +1,11 @@
+export * as authController from "./auth.controller";
+export * as heroController from "./hero.controller";
+export * as projectController from "./project.controller";
+export * as experienceController from "./experience.controller";
+export * as educationController from "./education.controller";
+export * as serviceController from "./service.controller";
+export * as aboutController from "./about.controller";
+export * as techstackController from "./techstack.controller";
+export * as contactController from "./contact.controller";
+export * as chatController from "./chat.controller";
+export * as uploadController from "./upload.controller";
