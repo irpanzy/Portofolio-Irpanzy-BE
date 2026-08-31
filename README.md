@@ -1,378 +1,284 @@
 # Portfolio Irpanzy - Backend API
 
-Backend API untuk portfolio Irfan Muria dengan fitur AI Chatbot terintegrasi.
+Backend RESTful API modern untuk portfolio **Irfan Muria** yang dibangun menggunakan Express.js, TypeScript, MongoDB, dan terintegrasi dengan Google Gemini AI Chatbot serta ImageKit cloud storage.
+
+---
+
+## 🌟 Key Features
+
+- 🤖 **AI Chatbot**: Asisten virtual portfolio interaktif berbasis **Google Gemini API** dengan kontekstual knowledge & chat history management.
+- 🦸 **Hero & About Separation**: Pemisahan data landing page (Hero/Greeting/Avatar) dan profil naratif (About/Bio/Summary) untuk fleksibilitas frontend.
+- 🎓 **Educations & Attachments**: Manajemen riwayat pendidikan lengkap (Formal, Bootcamp, Certification, Course) dengan lampiran dokumen (sertifikat, ijazah, transkrip) via ImageKit.
+- 💼 **Projects & Experience**: Portofolio proyek dan pengalaman kerja dengan dukungan soft-delete, tagging teknologi, dan visual showcase.
+- 🗂️ **Tech Stack Categorized**: 7 kategori teknologi (`languages`, `frontend`, `backend`, `mobile`, `database`, `devops_cloud`, `tools`).
+- 🔄 **Reordering System**: Dukungan drag-and-drop ordering untuk Projects, Educations, Experiences, dan Tech Stacks.
+- 🗑️ **Soft Delete & Trash Recovery**: Semua resource utama dilengkapi sistem Recycle Bin (trash, restore, dan force permanent delete).
+- 🖼️ **ImageKit Cloud Storage**: Upload gambar tunggal dan banyak gambar dengan manajemen auto fileId & deletion.
+- 🔐 **Secure JWT Authentication**: Akses token & refresh token mechanism, Bcrypt password hashing, dan rate-limited auth endpoints.
+- 🛡️ **Enterprise-Grade Security**: Sanitasi NoSQL injection, XSS protection, Helmet security headers, CORS origin whitelisting, dan Zod schema validation.
+
+---
 
 ## 🚀 Tech Stack
 
-- **Runtime**: Node.js + TypeScript
-- **Framework**: Express.js
-- **Database**: MongoDB (Mongoose ODM)
-- **File Storage**: ImageKit
-- **AI**: Google Gemini API
-- **Authentication**: JWT (jsonwebtoken + bcryptjs)
-- **Validation**: Zod
-- **Security**: Helmet, CORS, Custom Sanitizers (MongoDB & XSS)
-- **Rate Limiting**: Express-rate-limit
-- **File Upload**: Multer
-- **Logging**: Morgan
+| Kategori                 | Teknologi                                              |
+| ------------------------ | ------------------------------------------------------ |
+| **Runtime & Language**   | Node.js (v20+ / v22+), TypeScript                      |
+| **Web Framework**        | Express.js (v5)                                        |
+| **Database & ODM**       | MongoDB Atlas, Mongoose                                |
+| **AI Engine**            | Google Generative AI (Gemini Pro)                      |
+| **File Storage**         | ImageKit SDK                                           |
+| **Authentication**       | JWT (`jsonwebtoken`), `bcryptjs`                       |
+| **Request Validation**   | Zod                                                    |
+| **Security & Utilities** | Helmet, CORS, Express Rate Limit, Morgan, Multer, UUID |
+
+---
 
 ## 📁 Project Structure
 
 ```
-src/
-├── config/          # Konfigurasi (env, database, imagekit, gemini)
-├── controllers/     # Request handlers (9 controllers)
-├── middleware/      # Express middleware (8 modules)
-├── models/          # Mongoose models (8 models)
-├── routes/          # API routes (9 route files)
-├── services/        # Business logic (3 services)
-├── types/           # TypeScript interfaces (9 types)
-├── utils/           # Utilities (ApiError, ApiResponse, asyncHandler)
-├── validations/     # Zod schemas (8 validations)
-├── seeds/           # Database seeders
-└── app.ts           # Express app setup
-
-docs/
-├── API_CONTRACT.md           # Dokumentasi lengkap API
-├── postman_collection.json   # Postman collection
-└── README.md                 # Dokumentasi docs folder
+portofolio-irpanzy-be/
+├── api/
+│   └── index.ts                  # Entry point untuk Vercel Serverless Functions
+├── src/
+│   ├── config/                   # Konfigurasi aplikasi & database
+│   │   ├── database.ts           # Koneksi MongoDB Mongoose
+│   │   ├── env.ts                # Validasi environment variables dengan Zod
+│   │   ├── gemini.ts             # Inisialisasi Google Gemini AI
+│   │   ├── imagekit.ts           # Inisialisasi ImageKit client
+│   │   └── index.ts
+│   ├── controllers/              # Controller layer (11 controllers)
+│   │   ├── about.controller.ts
+│   │   ├── auth.controller.ts
+│   │   ├── chat.controller.ts
+│   │   ├── contact.controller.ts
+│   │   ├── education.controller.ts
+│   │   ├── experience.controller.ts
+│   │   ├── hero.controller.ts
+│   │   ├── project.controller.ts
+│   │   ├── service.controller.ts
+│   │   ├── techstack.controller.ts
+│   │   └── upload.controller.ts
+│   ├── middleware/               # Middleware layer (auth, error, upload, security, dll.)
+│   ├── models/                   # Mongoose schemas & models (11 models)
+│   │   ├── about.model.ts
+│   │   ├── admin.model.ts
+│   │   ├── chatHistory.model.ts
+│   │   ├── contact.model.ts
+│   │   ├── education.model.ts
+│   │   ├── experience.model.ts
+│   │   ├── hero.model.ts
+│   │   ├── project.model.ts
+│   │   ├── service.model.ts
+│   │   └── techstack.model.ts
+│   ├── routes/                   # Routing layer (11 route modules)
+│   ├── seeds/                    # Admin database seeder
+│   │   └── admin.seed.ts
+│   ├── services/                 # Business logic services (Auth, Chat, ImageKit)
+│   ├── types/                    # TypeScript interfaces & types
+│   ├── utils/                    # ApiError, ApiResponse, asyncHandler helpers
+│   ├── validations/              # Zod validation schemas
+│   └── app.ts                    # Express app initialization
+├── docs/                         # Dokumentasi API & Deployment
+│   ├── ABOUT_SETUP_GUIDE.md
+│   ├── API_CONTRACT.md
+│   ├── BACKEND_RESTRUCTURE_V2.md
+│   ├── DEPLOYMENT_CHECKLIST.md
+│   ├── EDUCATION_API.md
+│   ├── REORDER_API.md
+│   └── VERCEL_DEPLOYMENT.md
+├── vercel.json                   # Konfigurasi Vercel Zero-Config deployment
+├── tsconfig.json                 # TypeScript compiler configuration
+└── package.json
 ```
 
-## ⚙️ Installation
+---
 
-1. **Clone repository**
+## ⚙️ Installation & Setup
+
+### 1. Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/irpanzy/Portofolio-Irpanzy-BE.git
 cd portofolio-irpanzy-be
 ```
 
-2. **Install dependencies**
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-3. **Setup environment variables**
+### 3. Environment Variables
 
-Buat file `.env` di root project:
+Buat file `.env` di root project dan sesuaikan nilainya:
 
 ```env
 # Server
-NODE_ENV=development
 PORT=8000
+NODE_ENV=development
 
-# Database
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
+# Database (MongoDB Atlas / Local)
+DATABASE_URL=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority
 
-# JWT
-JWT_SECRET=your-super-secret-jwt-key-here
+# ImageKit Storage
+IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
+IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id
+MAX_FILE_SIZE=5242880 # 5 MB dalam bytes
+
+# Google Gemini AI
+GEMINI_API_KEY=your_gemini_api_key
+
+# JWT Configuration
+JWT_SECRET=your_super_secret_jwt_key_min_20_chars
 JWT_EXPIRES_IN=7d
-JWT_REFRESH_SECRET=your-refresh-secret-key-here
+JWT_REFRESH_SECRET=your_super_secret_refresh_key_min_20_chars
 JWT_REFRESH_EXPIRES_IN=30d
 
-# ImageKit
-IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
-IMAGEKIT_PRIVATE_KEY=your-imagekit-private-key
-IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your-id
+# Default Admin (digunakan saat database seeding)
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=YourStrongAdminPassword123
 
-# Gemini AI
-GEMINI_API_KEY=your-gemini-api-key
-
-# Admin Credentials (for seeding)
-ADMIN_EMAIL=admin@irpanzy.com
-ADMIN_PASSWORD=Admin123!
-
-# CORS
-ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000,https://irpanzy.vercel.app
+# CORS Allowed Origins (pisahkan dengan koma)
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173,https://your-frontend.vercel.app
 ```
 
-4. **Run development server**
+### 4. Database Seeding
 
-```bash
-npm run dev
-```
-
-Server akan berjalan di `http://localhost:8000`
-
-5. **Seed database (First time only)**
-
-Buat admin user dari kredensial di `.env`:
+Jalankan seeder untuk membuat akun Administrator awal dari konfigurasi `.env`:
 
 ```bash
 npm run seed
 ```
 
-Admin credentials diambil dari environment variables:
-
-- **ADMIN_EMAIL** dari `.env`
-- **ADMIN_PASSWORD** dari `.env`
-
-⚠️ **PENTING: Ganti password setelah login pertama kali!**
-
-Custom credentials (override env):
-
-```bash
-npm run seed -- --email custom@email.com --password CustomPass123
-```
-
-Force recreate admin:
+Jika ingin memaksa overwrite admin yang sudah ada:
 
 ```bash
 npm run seed:force
 ```
 
-Lihat `src/seeds/README.md` untuk opsi lainnya.
+### 5. Run Development Server
+
+```bash
+npm run dev
+```
+
+Server akan aktif di: `http://localhost:8000` (Health check: `http://localhost:8000/health`)
+
+---
 
 ## 📝 Available Scripts
 
-```bash
-npm run dev          # Run development server dengan hot reload
-npm run build        # Build TypeScript ke JavaScript
-npm start            # Run production server
-npm run seed         # Run database seeder (create default admin)
-npm run seed:admin   # Run admin seeder only
-npm run seed:force   # Force recreate admin if exists
-npm run format       # Format code dengan Prettier
-npm run format:check # Check code formatting
-```
-
-## 🔐 Authentication
-
-API menggunakan JWT untuk authentication. Untuk mengakses endpoint admin, include token di header:
-
-```
-Authorization: Bearer <your_jwt_token>
-```
-
-## 📚 API Documentation
-
-**Complete API Documentation:** `docs/API_CONTRACT.md`
-
-Dokumentasi lengkap berisi:
-
-- All 50+ endpoints dengan request/response examples
-- Authentication flow
-- Error handling
-- Rate limiting
-- Validation rules
-
-**Testing API:**
-
-- Gunakan Postman, Thunder Client, atau HTTP client lainnya
-- Lihat dokumentasi lengkap di `docs/API_CONTRACT.md`
-
-### Base URL
-
-- **Development**: `http://localhost:8000/api`
-- **Production**: `https://your-domain.com/api`
-
-### Endpoint Categories
-
-**Public Endpoints:**
-
-- `GET /api/projects` - Daftar projects
-- `GET /api/experiences` - Daftar pengalaman
-- `GET /api/services` - Daftar layanan
-- `GET /api/techstacks` - Daftar tech stack
-- `GET /api/about` - Informasi about
-- `POST /api/contact` - Submit contact form
-- `POST /api/chat` - Chat dengan AI
-
-**Admin Endpoints (Auth Required):**
-
-- `/api/auth/*` - Authentication
-- `/api/projects/*` - CRUD Projects + Soft Delete
-- `/api/experiences/*` - CRUD Experiences + Soft Delete
-- `/api/services/*` - CRUD Services + Soft Delete
-- `/api/techstacks/*` - CRUD Tech Stacks + Soft Delete
-- `/api/about/*` - Update About
-- `/api/contact/*` - Manage Contact Messages
-- `/api/chat/history/*` - Manage Chat History
-- `/api/upload/*` - File Upload Management
-
-## 🗂️ Features
-
-### ✅ CRUD Operations
-
-- Full CRUD untuk Projects, Experiences, Services, Tech Stacks
-- Read/Update untuk About (single document)
-- Create/Read/Delete untuk Contact Messages
-
-### ✅ Soft Delete (Recycle Bin)
-
-Soft delete tersedia untuk:
-
-- Projects
-- Experiences
-- Services
-- Tech Stacks
-
-Setiap entity memiliki 8 actions:
-
-- Create, Read, Update, Delete (soft)
-- Get Trash, Restore, Force Delete (permanent)
-
-### ✅ File Upload (ImageKit)
-
-- Single file upload
-- Multiple files upload (max 10)
-- Organized folder structure:
-  - `/portfolio/projects` - Gambar projects
-  - `/portfolio/experiences` - Gambar experiences
-  - `/portfolio/services` - Icon services
-  - `/portfolio/techstacks` - Logo tech stack
-  - `/portfolio/about` - Foto profile
-
-### ✅ AI Chatbot
-
-- Powered by Google Gemini API
-- Portfolio context-aware responses
-- Chat history management
-- Session-based conversations
-
-### ✅ Security
-
-- JWT Authentication
-- Password hashing (bcrypt)
-- Rate limiting (berbeda per endpoint)
-- CORS protection
-- Helmet security headers
-- Custom XSS sanitizer (replaces xss-clean)
-- Custom MongoDB injection sanitizer (replaces express-mongo-sanitize, Express 5 compatible)
-- Input sanitization
-
-### ✅ Rate Limiting
-
-- General: 100 req/15min
-- Auth: 5 req/15min
-- Chat: 10 req/15min
-- Contact: 3 req/15min
-
-## 🔄 Response Format
-
-### Success Response
-
-```json
-{
-  "statusCode": 200,
-  "message": "Success message",
-  "data": {}
-}
-```
-
-### Error Response
-
-```json
-{
-  "statusCode": 400,
-  "message": "Error message",
-  "errors": []
-}
-```
-
-## 🧪 Testing API
-
-### Quick Start dengan cURL
-
-**1. Login untuk mendapatkan token:**
-
-```bash
-curl -X POST http://localhost:8000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "irfanmuria04@gmail.com",
-    "password": "Irfanmuria85!"
-  }'
-```
-
-Response akan berisi `accessToken` dan `refreshToken`.
-
-**2. Test Public Endpoints (tanpa auth):**
-
-```bash
-# Get all projects
-curl http://localhost:8000/api/projects
-
-# Get all experiences
-curl http://localhost:8000/api/experiences
-
-# Chat with AI
-curl -X POST http://localhost:8000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What technologies does Irfan use?"}'
-```
-
-**3. Test Admin Endpoints (dengan auth):**
-
-```bash
-# Create project
-curl -X POST http://localhost:8000/api/projects \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
-  -d '{
-    "title": "My Project",
-    "description": "Project description",
-    "techStack": ["React", "Node.js"],
-    "order": 1,
-    "isVisible": true
-  }'
-```
-
-**4. Refresh Token (when expired):**
-
-```bash
-curl -X POST http://localhost:8000/api/auth/refresh \
-  -H "Content-Type: application/json" \
-  -d '{"refreshToken": "YOUR_REFRESH_TOKEN"}'
-```
-
-### Testing dengan Postman/Thunder Client
-
-1. **Set Base URL**: `http://localhost:8000/api`
-2. **Login**: POST `/auth/login` dengan credentials dari `.env`
-3. **Copy Access Token** dari response
-4. **Set Authorization**: Type "Bearer Token", paste access token
-5. **Test Endpoints**: Lihat `docs/API_CONTRACT.md` untuk semua endpoints
+| Command                | Keterangan                                                            |
+| ---------------------- | --------------------------------------------------------------------- |
+| `npm run dev`          | Menjalankan server development dengan auto-reload (tsx + nodemon)     |
+| `npm run build`        | Menjalankan TypeScript compiler (`tsc`) ke folder `dist/`             |
+| `npm start`            | Menjalankan build JavaScript di lingkungan production (`dist/app.js`) |
+| `npm run seed`         | Membuat user admin awal ke database                                   |
+| `npm run seed:force`   | Menghapus dan membuat ulang user admin                                |
+| `npm run format`       | Melakukan formatting kode ke seluruh file dengan Prettier             |
+| `npm run format:check` | Memeriksa formatting kode tanpa mengubah file                         |
 
 ---
 
-## 🌐 Frontend Integration
+## 📡 API Endpoints Overview
 
-- **Frontend Repo**: `D:\Coding\Next\Portofolio-Irpanzy`
-- **Development**: `http://localhost:5173`
-- **Production**: `https://irpanzy.vercel.app`
+Semua route API diawali dengan prefix `/api`.
 
-CORS sudah dikonfigurasi untuk kedua URL di atas.
+### 1. Public Endpoints
 
-## 📦 Database Models
+- **Hero**: `GET /api/hero`
+- **About**: `GET /api/about`
+- **Educations**: `GET /api/educations`, `GET /api/educations/:id`
+- **Experiences**: `GET /api/experiences`, `GET /api/experiences/:id`
+- **Projects**: `GET /api/projects`, `GET /api/projects/:id`
+- **Services**: `GET /api/services`, `GET /api/services/:id`
+- **Tech Stacks**: `GET /api/techstacks` _(support query filter: `?category=frontend`)_, `GET /api/techstacks/:id`
+- **Contact Form**: `POST /api/contact`
+- **AI Chatbot**: `POST /api/chat`
+- **Health Check**: `GET /health`
 
-1. **Admin** - Admin user dengan authentication
-2. **Project** - Portfolio projects dengan soft delete
-3. **Experience** - Work experiences dengan soft delete
-4. **Service** - Services offered dengan soft delete
-5. **TechStack** - Technologies & skills dengan soft delete
-6. **About** - About information (single document)
-7. **Contact** - Contact form submissions
-8. **ChatHistory** - AI chat conversation history
+### 2. Authentication (`/api/auth`)
 
-## 🔧 Development Notes
+- `POST /api/auth/login` - Login admin & mendapatkan accessToken + refreshToken
+- `POST /api/auth/refresh` - Refresh access token yang kadaluarsa
+- `GET /api/auth/profile` - Ambil profil admin _(Auth Required)_
+- `PUT /api/auth/password` - Ganti password admin _(Auth Required)_
 
-- Menggunakan **ES Modules** (bukan CommonJS)
-- Semua exports menggunakan **named exports** (tidak ada default export)
-- TypeScript strict mode enabled
-- Prettier untuk code formatting
-- Nodemon untuk auto-reload development
+### 3. Protected / Admin Endpoints _(Bearer Token Required)_
 
-## 📄 License
+- **Hero & About**:
+  - `POST /api/hero`, `PUT /api/hero`
+  - `POST /api/about`, `PUT /api/about`
+- **CRUD & Soft Delete** (`/projects`, `/experiences`, `/educations`, `/services`, `/techstacks`):
+  - `POST /api/<module>` - Tambah data baru
+  - `PUT /api/<module>/:id` - Update data
+  - `DELETE /api/<module>/:id` - Pindahkan data ke Trash (Soft Delete)
+  - `GET /api/<module>/trash/all` - Lihat data di Trash
+  - `PATCH /api/<module>/:id/restore` - Pulihkan data dari Trash
+  - `DELETE /api/<module>/:id/force` - Hapus permanen
+- **Reordering** (`PATCH /api/<module>/reorder`):
+  - `PATCH /api/projects/reorder`
+  - `PATCH /api/educations/reorder`
+  - `PATCH /api/experiences/reorder`
+  - `PATCH /api/techstacks/reorder`
+- **Media Upload** (`/api/upload`):
+  - `POST /api/upload/single` - Upload 1 gambar ke ImageKit
+  - `POST /api/upload/multiple` - Upload banyak gambar sekaligus
+  - `DELETE /api/upload/:fileId` - Hapus gambar dari ImageKit
+- **Contact & Chat Management**:
+  - `GET /api/contact`, `GET /api/contact/:id`, `DELETE /api/contact/:id`
+  - `GET /api/chat/history`, `GET /api/chat/history/:id`, `DELETE /api/chat/history/:id`, `DELETE /api/chat/history`
 
-ISC
+---
+
+## 🚀 Deployment to Vercel
+
+Backend ini sudah dikonfigurasi untuk berjalan mulus di **Vercel Serverless Functions**:
+
+1. Pastikan file [vercel.json](file:///d:/Coding/Express/portofolio-irpanzy-be/vercel.json) menggunakan format Zero-Config:
+   ```json
+   {
+     "version": 2,
+     "rewrites": [
+       {
+         "source": "/(.*)",
+         "destination": "/api"
+       }
+     ],
+     "functions": {
+       "api/index.ts": {
+         "maxDuration": 30
+       }
+     }
+   }
+   ```
+2. Hubungkan repository ke dashboard Vercel.
+3. Masukkan seluruh environment variables yang dibutuhkan di **Project Settings** > **Environment Variables**.
+4. Deploy!
+
+Panduan langkah demi langkah lengkap dapat dilihat di [docs/VERCEL_DEPLOYMENT.md](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/VERCEL_DEPLOYMENT.md).
+
+---
+
+## 📚 Complete Documentation
+
+Detail kontrak request/response dan panduan teknis tersedia di folder `docs/`:
+
+- 📖 [API Contract Documentation](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/API_CONTRACT.md)
+- 🚀 [Vercel Deployment Guide](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/VERCEL_DEPLOYMENT.md)
+- 🎓 [Education & Attachments API](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/EDUCATION_API.md)
+- 🔄 [Drag & Drop Reorder API](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/REORDER_API.md)
+- 🛠️ [Backend Restructure V2 Guide](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/BACKEND_RESTRUCTURE_V2.md)
+- 📋 [Pre-Deployment Checklist](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/DEPLOYMENT_CHECKLIST.md)
+
+---
 
 ## 👤 Author
 
-**Irfan Muria**
+**Irfan Muria (Irpanzy)**
 
----
-
-**API Version**: 1.0.0
-**Last Updated**: July 26, 2026
+- **API Version**: 1.0.0
+- **License**: ISC
+- **Last Updated**: 31 Agustus 2026
