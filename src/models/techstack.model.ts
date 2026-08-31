@@ -6,8 +6,8 @@ const techStackSchema = new Schema<ITechStack>(
     title: { type: String, required: true },
     icon: { type: String, required: false },
     iconFileId: { type: String, required: false },
-    category: {
-      type: String,
+    categories: {
+      type: [String],
       enum: [
         "languages",
         "frontend",
@@ -17,7 +17,13 @@ const techStackSchema = new Schema<ITechStack>(
         "devops_cloud",
         "tools",
       ],
-      default: "frontend",
+      required: true,
+      validate: {
+        validator: function (value: string[]) {
+          return Array.isArray(value) && value.length > 0;
+        },
+        message: "At least one category is required",
+      },
     },
     proficiencyLevel: {
       type: Number,
@@ -35,7 +41,7 @@ const techStackSchema = new Schema<ITechStack>(
   }
 );
 
-techStackSchema.index({ category: 1, order: 1 });
+techStackSchema.index({ categories: 1, order: 1 });
 techStackSchema.index({ deletedAt: 1 });
 
 export const TechStack = mongoose.model<ITechStack>(

@@ -13,7 +13,7 @@ export interface ITechStack extends Document {
   title: string;
   icon?: string;
   iconFileId?: string;
-  category: TechCategory;
+  categories: TechCategory[];
   proficiencyLevel?: number | null;
   order: number;
   deletedAt: Date | null;
@@ -24,7 +24,7 @@ export interface ITechStack extends Document {
 
 export interface CreateTechStackDTO {
   title: string;
-  category: TechCategory;
+  categories: TechCategory[];
   order?: number;
   icon?: string;
   iconFileId?: string;
@@ -33,7 +33,7 @@ export interface CreateTechStackDTO {
 
 export interface UpdateTechStackDTO {
   title?: string;
-  category?: TechCategory;
+  categories?: TechCategory[];
   order?: number;
   icon?: string;
   iconFileId?: string;

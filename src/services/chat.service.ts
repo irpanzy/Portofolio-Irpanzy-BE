@@ -67,15 +67,18 @@ ${projects
 
 [TECHNICAL SKILLS]
 ${Object.entries(
-  techStack.reduce((acc: any, tech) => {
-    if (!acc[tech.category]) acc[tech.category] = [];
-    acc[tech.category].push(tech.title);
-    return acc;
-  }, {})
-)
-  .map(
-    ([category, skills]) => `${category}: ${(skills as string[]).join(", ")}`
+  techStack.reduce(
+    (acc: Record<string, string[]>, tech) => {
+      tech.categories.forEach((cat) => {
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(tech.title);
+      });
+      return acc;
+    },
+    {} as Record<string, string[]>
   )
+)
+  .map(([category, skills]) => `${category}: ${skills.join(", ")}`)
   .join("\n")}
 
 [SERVICES OFFERED]

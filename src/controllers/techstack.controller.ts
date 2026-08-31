@@ -7,10 +7,11 @@ export const getTechStacks = asyncHandler(
     const { category } = req.query;
     const filter: any = { deletedAt: null };
 
-    if (category) filter.category = category;
+    if (category) {
+      filter.categories = { $in: [category] };
+    }
 
     const techStacks = await TechStack.find(filter).sort({
-      category: 1,
       order: 1,
     });
     res.json(new ApiResponse(200, "Tech stacks retrieved", techStacks));
@@ -111,7 +112,6 @@ export const reorderTechStacks = asyncHandler(
     await TechStack.bulkWrite(bulkOps);
 
     const techStacks = await TechStack.find({ deletedAt: null }).sort({
-      category: 1,
       order: 1,
     });
 
