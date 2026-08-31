@@ -5,12 +5,17 @@ import { createTechStackSchema, updateTechStackSchema } from "../validations";
 
 export const techstackRouter = Router();
 
-// Public routes
 techstackRouter.get("/", generalLimiter, techstackController.getTechStacks);
 techstackRouter.get("/:id", generalLimiter, techstackController.getTechStack);
 
-// Admin routes
 techstackRouter.get("/trash/all", authenticate, techstackController.getTrash);
+
+techstackRouter.patch(
+  "/reorder",
+  authenticate,
+  techstackController.reorderTechStacks
+);
+
 techstackRouter.post(
   "/",
   authenticate,

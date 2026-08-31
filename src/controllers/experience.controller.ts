@@ -88,3 +88,30 @@ export const forceDeleteExperience = asyncHandler(
     );
   }
 );
+
+export const reorderExperiences = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { orders } = req.body;
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+      throw new ApiError(400, "Orders array is required");
+    }
+
+    const bulkOps = orders.map((item: { id: string; order: number }) => ({
+      updateOne: {
+        filter: { _id: item.id, deletedAt: null },
+        update: { $set: { order: item.order } },
+      },
+    }));
+
+    await Experience.bulkWrite(bulkOps);
+
+    const experiences = await Experience.find({ deletedAt: null }).sort({
+      order: 1,
+    });
+
+    res.json(
+      new ApiResponse(200, "Experiences reordered successfully", experiences)
+    );
+  }
+);

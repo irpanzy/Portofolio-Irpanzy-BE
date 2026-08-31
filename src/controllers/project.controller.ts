@@ -110,3 +110,26 @@ export const forceDeleteProject = asyncHandler(
     );
   }
 );
+
+export const reorderProjects = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { orders } = req.body;
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+      throw new ApiError(400, "Orders array is required");
+    }
+
+    const bulkOps = orders.map((item: { id: string; order: number }) => ({
+      updateOne: {
+        filter: { _id: item.id, deletedAt: null },
+        update: { $set: { order: item.order } },
+      },
+    }));
+
+    await Project.bulkWrite(bulkOps);
+
+    const projects = await Project.find({ deletedAt: null }).sort({ order: 1 });
+
+    res.json(new ApiResponse(200, "Projects reordered successfully", projects));
+  }
+);

@@ -8,9 +8,6 @@ import {
   updateEducationSchema,
 } from "../validations/education.validation";
 
-// @desc    Get all educations
-// @route   GET /api/educations
-// @access  Public
 export const getEducations = asyncHandler(
   async (req: Request, res: Response) => {
     const educations = await Education.find({ deletedAt: null }).sort({
@@ -26,9 +23,6 @@ export const getEducations = asyncHandler(
   }
 );
 
-// @desc    Get single education by ID
-// @route   GET /api/educations/:id
-// @access  Public
 export const getEducation = asyncHandler(
   async (req: Request, res: Response) => {
     const education = await Education.findOne({
@@ -48,14 +42,10 @@ export const getEducation = asyncHandler(
   }
 );
 
-// @desc    Create new education
-// @route   POST /api/educations
-// @access  Private (Admin)
 export const createEducation = asyncHandler(
   async (req: Request, res: Response) => {
     const validatedData = createEducationSchema.parse(req.body);
 
-    // Convert date strings to Date objects
     const educationData = {
       ...validatedData,
       startDate: new Date(validatedData.startDate),
@@ -70,9 +60,6 @@ export const createEducation = asyncHandler(
   }
 );
 
-// @desc    Update education
-// @route   PUT /api/educations/:id
-// @access  Private (Admin)
 export const updateEducation = asyncHandler(
   async (req: Request, res: Response) => {
     const validatedData = updateEducationSchema.parse(req.body);
@@ -86,7 +73,6 @@ export const updateEducation = asyncHandler(
       throw new ApiError(404, "Education not found");
     }
 
-    // Convert date strings to Date objects if provided
     const updateData: any = { ...validatedData };
     if (validatedData.startDate) {
       updateData.startDate = new Date(validatedData.startDate);
@@ -104,9 +90,6 @@ export const updateEducation = asyncHandler(
   }
 );
 
-// @desc    Delete education (soft delete)
-// @route   DELETE /api/educations/:id
-// @access  Private (Admin)
 export const deleteEducation = asyncHandler(
   async (req: Request, res: Response) => {
     const education = await Education.findOneAndUpdate(
@@ -127,9 +110,6 @@ export const deleteEducation = asyncHandler(
   }
 );
 
-// @desc    Get trash (deleted educations)
-// @route   GET /api/educations/trash
-// @access  Private (Admin)
 export const getTrash = asyncHandler(async (req: Request, res: Response) => {
   const educations = await Education.find({ deletedAt: { $ne: null } }).sort({
     deletedAt: -1,
@@ -140,9 +120,6 @@ export const getTrash = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse(200, "Trash retrieved successfully", educations));
 });
 
-// @desc    Restore education from trash
-// @route   PATCH /api/educations/:id/restore
-// @access  Private (Admin)
 export const restoreEducation = asyncHandler(
   async (req: Request, res: Response) => {
     const education = await Education.findOneAndUpdate(
@@ -161,9 +138,6 @@ export const restoreEducation = asyncHandler(
   }
 );
 
-// @desc    Force delete education (permanent)
-// @route   DELETE /api/educations/:id/force
-// @access  Private (Admin)
 export const forceDeleteEducation = asyncHandler(
   async (req: Request, res: Response) => {
     const education = await Education.findOneAndDelete({
@@ -180,5 +154,35 @@ export const forceDeleteEducation = asyncHandler(
         id: education._id,
       })
     );
+  }
+);
+
+export const reorderEducations = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { orders } = req.body;
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+      throw new ApiError(400, "Orders array is required");
+    }
+
+    const bulkOps = orders.map((item: { id: string; order: number }) => ({
+      updateOne: {
+        filter: { _id: item.id, deletedAt: null },
+        update: { $set: { order: item.order } },
+      },
+    }));
+
+    await Education.bulkWrite(bulkOps);
+
+    const educations = await Education.find({ deletedAt: null }).sort({
+      order: 1,
+      startDate: -1,
+    });
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Educations reordered successfully", educations)
+      );
   }
 );

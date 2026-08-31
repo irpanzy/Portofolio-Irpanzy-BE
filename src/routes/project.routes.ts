@@ -5,12 +5,17 @@ import { createProjectSchema, updateProjectSchema } from "../validations";
 
 export const projectRouter = Router();
 
-// Public routes
 projectRouter.get("/", generalLimiter, projectController.getProjects);
 projectRouter.get("/:id", generalLimiter, projectController.getProject);
 
-// Admin routes
 projectRouter.get("/trash/all", authenticate, projectController.getTrash);
+
+projectRouter.patch(
+  "/reorder",
+  authenticate,
+  projectController.reorderProjects
+);
+
 projectRouter.post(
   "/",
   authenticate,

@@ -8,6 +8,7 @@ import {
   getTrash,
   restoreEducation,
   forceDeleteEducation,
+  reorderEducations,
 } from "../controllers/education.controller";
 import { authenticate } from "../middleware/auth.middleware";
 import { validateBody } from "../middleware/validation.middleware";
@@ -36,6 +37,8 @@ educationRouter.put(
 );
 
 educationRouter.delete("/:id", authenticate, deleteEducation);
+
+educationRouter.patch("/reorder", authenticate, reorderEducations);
 
 educationRouter.get("/trash/all", authenticate, getTrash);
 educationRouter.patch("/:id/restore", authenticate, restoreEducation);

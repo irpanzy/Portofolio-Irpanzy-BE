@@ -5,7 +5,6 @@ import { createExperienceSchema, updateExperienceSchema } from "../validations";
 
 export const experienceRouter = Router();
 
-// Public routes
 experienceRouter.get("/", generalLimiter, experienceController.getExperiences);
 experienceRouter.get(
   "/:id",
@@ -13,8 +12,14 @@ experienceRouter.get(
   experienceController.getExperience
 );
 
-// Admin routes
 experienceRouter.get("/trash/all", authenticate, experienceController.getTrash);
+
+experienceRouter.patch(
+  "/reorder",
+  authenticate,
+  experienceController.reorderExperiences
+);
+
 experienceRouter.post(
   "/",
   authenticate,

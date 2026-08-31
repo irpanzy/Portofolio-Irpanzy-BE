@@ -92,3 +92,31 @@ export const forceDeleteTechStack = asyncHandler(
     );
   }
 );
+
+export const reorderTechStacks = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { orders } = req.body;
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+      throw new ApiError(400, "Orders array is required");
+    }
+
+    const bulkOps = orders.map((item: { id: string; order: number }) => ({
+      updateOne: {
+        filter: { _id: item.id, deletedAt: null },
+        update: { $set: { order: item.order } },
+      },
+    }));
+
+    await TechStack.bulkWrite(bulkOps);
+
+    const techStacks = await TechStack.find({ deletedAt: null }).sort({
+      category: 1,
+      order: 1,
+    });
+
+    res.json(
+      new ApiResponse(200, "Tech stacks reordered successfully", techStacks)
+    );
+  }
+);
