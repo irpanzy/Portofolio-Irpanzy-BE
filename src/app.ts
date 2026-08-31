@@ -49,6 +49,14 @@ const startServer = async () => {
   }
 };
 
-startServer();
+if (process.env.VERCEL !== "1") {
+  startServer();
+}
+
+if (process.env.VERCEL === "1") {
+  connectDatabase().catch((error) => {
+    console.error("Failed to connect to database:", error);
+  });
+}
 
 export { app };
