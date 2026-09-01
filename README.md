@@ -1,284 +1,577 @@
-# Portfolio Irpanzy - Backend API
+# 🌟 Portfolio Irfan Muria - Backend API
 
-Backend RESTful API modern untuk portfolio **Irfan Muria** yang dibangun menggunakan Express.js, TypeScript, MongoDB, dan terintegrasi dengan Google Gemini AI Chatbot serta ImageKit cloud storage.
-
----
-
-## 🌟 Key Features
-
-- 🤖 **AI Chatbot**: Asisten virtual portfolio interaktif berbasis **Google Gemini API** dengan kontekstual knowledge & chat history management.
-- 🦸 **Hero & About Separation**: Pemisahan data landing page (Hero/Greeting/Avatar) dan profil naratif (About/Bio/Summary) untuk fleksibilitas frontend.
-- 🎓 **Educations & Attachments**: Manajemen riwayat pendidikan lengkap (Formal, Bootcamp, Certification, Course) dengan lampiran dokumen (sertifikat, ijazah, transkrip) via ImageKit.
-- 💼 **Projects & Experience**: Portofolio proyek dan pengalaman kerja dengan dukungan soft-delete, tagging teknologi, dan visual showcase.
-- 🗂️ **Tech Stack Categorized**: 7 kategori teknologi (`languages`, `frontend`, `backend`, `mobile`, `database`, `devops_cloud`, `tools`).
-- 🔄 **Reordering System**: Dukungan drag-and-drop ordering untuk Projects, Educations, Experiences, dan Tech Stacks.
-- 🗑️ **Soft Delete & Trash Recovery**: Semua resource utama dilengkapi sistem Recycle Bin (trash, restore, dan force permanent delete).
-- 🖼️ **ImageKit Cloud Storage**: Upload gambar tunggal dan banyak gambar dengan manajemen auto fileId & deletion.
-- 🔐 **Secure JWT Authentication**: Akses token & refresh token mechanism, Bcrypt password hashing, dan rate-limited auth endpoints.
-- 🛡️ **Enterprise-Grade Security**: Sanitasi NoSQL injection, XSS protection, Helmet security headers, CORS origin whitelisting, dan Zod schema validation.
+Backend API untuk portfolio Irfan Muria dengan fitur AI Chatbot, Hero/About Management, dan Multi-Category Tech Stack.
 
 ---
 
 ## 🚀 Tech Stack
 
-| Kategori                 | Teknologi                                              |
-| ------------------------ | ------------------------------------------------------ |
-| **Runtime & Language**   | Node.js (v20+ / v22+), TypeScript                      |
-| **Web Framework**        | Express.js (v5)                                        |
-| **Database & ODM**       | MongoDB Atlas, Mongoose                                |
-| **AI Engine**            | Google Generative AI (Gemini Pro)                      |
-| **File Storage**         | ImageKit SDK                                           |
-| **Authentication**       | JWT (`jsonwebtoken`), `bcryptjs`                       |
-| **Request Validation**   | Zod                                                    |
-| **Security & Utilities** | Helmet, CORS, Express Rate Limit, Morgan, Multer, UUID |
+### **Core Technologies**
+
+- **Runtime**: Node.js 18+ with TypeScript
+- **Framework**: Express.js 5.2+
+- **Database**: MongoDB (Mongoose ODM)
+- **File Storage**: ImageKit
+- **AI Integration**: Google Gemini API
+
+### **Authentication & Security**
+
+- **Authentication**: JWT (jsonwebtoken + bcryptjs)
+- **Security**: Helmet, CORS, Rate Limiting
+- **Validation**: Zod Schemas
+- **Sanitization**: Custom MongoDB & XSS Sanitizers
+
+### **Development & Build**
+
+- **Language**: TypeScript 7.0+
+- **Build Tool**: tsc (TypeScript Compiler)
+- **Dev Server**: tsx + nodemon
+- **Code Formatting**: Prettier
+
+---
+
+## 📦 Dependencies
+
+### **Production Dependencies**
+
+| Package                 | Version      | Purpose                   |
+| ----------------------- | ------------ | ------------------------- |
+| `express`               | ^5.2.1       | Web framework             |
+| `mongoose`              | ^8.0.0       | MongoDB ODM               |
+| `typescript`            | ^7.0.2       | TypeScript compiler       |
+| `zod`                   | ^3.22.4      | Schema validation         |
+| `jsonwebtoken`          | ^9.0.2       | JWT authentication        |
+| `bcryptjs`              | ^2.4.3       | Password hashing          |
+| `@google/generative-ai` | ^0.21.0      | Gemini AI integration     |
+| `imagekit`              | ^5.0.0       | File storage & management |
+| `cors`                  | ^2.8.6       | CORS middleware           |
+| `helmet`                | ^8.3.0       | Security headers          |
+| `express-rate-limit`    | ^7.1.5       | Rate limiting             |
+| `morgan`                | ^1.11.0      | HTTP request logger       |
+| `multer`                | ^1.4.5-lts.1 | File upload handling      |
+| `uuid`                  | ^10.0.0      | UUID generation           |
+| `dotenv`                | ^16.3.1      | Environment variables     |
+
+### **Development Dependencies**
+
+| Package    | Version | Purpose                     |
+| ---------- | ------- | --------------------------- |
+| `@types/*` | Latest  | TypeScript type definitions |
+| `tsx`      | ^4.23.1 | TypeScript execution        |
+| `nodemon`  | ^3.1.14 | Development auto-reload     |
+| `prettier` | ^3.9.6  | Code formatting             |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-portofolio-irpanzy-be/
-├── api/
-│   └── index.ts                  # Entry point untuk Vercel Serverless Functions
-├── src/
-│   ├── config/                   # Konfigurasi aplikasi & database
-│   │   ├── database.ts           # Koneksi MongoDB Mongoose
-│   │   ├── env.ts                # Validasi environment variables dengan Zod
-│   │   ├── gemini.ts             # Inisialisasi Google Gemini AI
-│   │   ├── imagekit.ts           # Inisialisasi ImageKit client
-│   │   └── index.ts
-│   ├── controllers/              # Controller layer (11 controllers)
-│   │   ├── about.controller.ts
-│   │   ├── auth.controller.ts
-│   │   ├── chat.controller.ts
-│   │   ├── contact.controller.ts
-│   │   ├── education.controller.ts
-│   │   ├── experience.controller.ts
-│   │   ├── hero.controller.ts
-│   │   ├── project.controller.ts
-│   │   ├── service.controller.ts
-│   │   ├── techstack.controller.ts
-│   │   └── upload.controller.ts
-│   ├── middleware/               # Middleware layer (auth, error, upload, security, dll.)
-│   ├── models/                   # Mongoose schemas & models (11 models)
-│   │   ├── about.model.ts
-│   │   ├── admin.model.ts
-│   │   ├── chatHistory.model.ts
-│   │   ├── contact.model.ts
-│   │   ├── education.model.ts
-│   │   ├── experience.model.ts
-│   │   ├── hero.model.ts
-│   │   ├── project.model.ts
-│   │   ├── service.model.ts
-│   │   └── techstack.model.ts
-│   ├── routes/                   # Routing layer (11 route modules)
-│   ├── seeds/                    # Admin database seeder
-│   │   └── admin.seed.ts
-│   ├── services/                 # Business logic services (Auth, Chat, ImageKit)
-│   ├── types/                    # TypeScript interfaces & types
-│   ├── utils/                    # ApiError, ApiResponse, asyncHandler helpers
-│   ├── validations/              # Zod validation schemas
-│   └── app.ts                    # Express app initialization
-├── docs/                         # Dokumentasi API & Deployment
-│   ├── ABOUT_SETUP_GUIDE.md
-│   ├── API_CONTRACT.md
-│   ├── BACKEND_RESTRUCTURE_V2.md
-│   ├── DEPLOYMENT_CHECKLIST.md
-│   ├── EDUCATION_API.md
-│   ├── REORDER_API.md
-│   └── VERCEL_DEPLOYMENT.md
-├── vercel.json                   # Konfigurasi Vercel Zero-Config deployment
-├── tsconfig.json                 # TypeScript compiler configuration
-└── package.json
+src/
+├── 📂 config/           # Configuration modules
+│   ├── database.ts      # MongoDB connection
+│   ├── env.ts          # Environment variables
+│   ├── imagekit.ts     # ImageKit configuration
+│   ├── gemini.ts       # Google Gemini AI
+│   └── index.ts        # Export all configs
+├── 📂 controllers/      # Request handlers (10 controllers)
+│   ├── auth.controller.ts
+│   ├── hero.controller.ts       # 🆕 Landing page data
+│   ├── about.controller.ts      # 🔄 Simplified
+│   ├── project.controller.ts
+│   ├── experience.controller.ts
+│   ├── education.controller.ts  # 🆕 Education with attachments
+│   ├── service.controller.ts
+│   ├── techstack.controller.ts  # 🔄 Multi-category + cascade update
+│   ├── contact.controller.ts
+│   ├── chat.controller.ts
+│   └── upload.controller.ts
+├── 📂 middleware/       # Express middleware (9 modules)
+│   ├── auth.middleware.ts
+│   ├── cors.middleware.ts
+│   ├── error.middleware.ts
+│   ├── logger.middleware.ts
+│   ├── rateLimiter.middleware.ts
+│   ├── sanitize.middleware.ts    # Custom MongoDB & XSS sanitizers
+│   ├── upload.middleware.ts
+│   └── validation.middleware.ts
+├── 📂 models/           # Mongoose models (9 models)
+│   ├── admin.model.ts
+│   ├── hero.model.ts            # 🆕 Hero/Home section
+│   ├── about.model.ts           # 🔄 Simplified (bio, summary)
+│   ├── project.model.ts
+│   ├── experience.model.ts
+│   ├── education.model.ts       # 🆕 With attachments support
+│   ├── service.model.ts
+│   ├── techstack.model.ts       # 🔄 Multi-category support
+│   ├── contact.model.ts
+│   └── chatHistory.model.ts
+├── 📂 routes/           # API routes (10 route files)
+│   ├── auth.routes.ts
+│   ├── hero.routes.ts           # 🆕 GET, POST, PUT endpoints
+│   ├── about.routes.ts          # 🔄 Updated
+│   ├── project.routes.ts        # 🔄 Added reorder endpoint
+│   ├── experience.routes.ts     # 🔄 Added reorder endpoint
+│   ├── education.routes.ts      # 🆕 Full CRUD + reorder
+│   ├── service.routes.ts
+│   ├── techstack.routes.ts      # 🔄 Added reorder endpoint
+│   ├── contact.routes.ts
+│   ├── chat.routes.ts
+│   ├── upload.routes.ts
+│   └── index.ts                 # Route aggregator
+├── 📂 services/         # Business logic (4 services)
+│   ├── auth.service.ts
+│   ├── chat.service.ts          # 🔄 Updated for Hero model
+│   ├── imagekit.service.ts
+│   └── index.ts
+├── 📂 types/            # TypeScript interfaces (10 types)
+│   ├── auth.types.ts
+│   ├── hero.types.ts            # 🆕 Hero interfaces
+│   ├── about.types.ts           # 🔄 Simplified
+│   ├── project.types.ts
+│   ├── experience.types.ts
+│   ├── education.types.ts       # 🆕 Education interfaces
+│   ├── service.types.ts
+│   ├── techstack.types.ts       # 🔄 Multi-category support
+│   ├── contact.types.ts
+│   ├── chat.types.ts
+│   └── common.types.ts
+├── 📂 utils/            # Utility functions
+│   ├── ApiError.ts              # Error handling
+│   ├── ApiResponse.ts           # Response formatting
+│   └── asyncHandler.ts          # Async error wrapper
+├── 📂 validations/      # Zod validation schemas (9 validations)
+│   ├── auth.validation.ts
+│   ├── hero.validation.ts       # 🆕 Hero validation
+│   ├── about.validation.ts      # 🔄 Updated
+│   ├── project.validation.ts
+│   ├── experience.validation.ts
+│   ├── education.validation.ts  # 🆕 Education validation
+│   ├── service.validation.ts
+│   ├── techstack.validation.ts  # 🔄 Multi-category validation
+│   └── contact.validation.ts
+├── 📂 seeds/            # Database seeders
+│   └── admin.seed.ts            # Admin user seeder
+└── app.ts               # Express app setup
+
+api/
+└── index.ts             # 🆕 Vercel serverless entry point
+
+docs/
+└── API_CONTRACT.md              # Complete API documentation
 ```
+
+---
+
+## 🎯 Key Features
+
+### ✨ **New Features (Latest Update)**
+
+#### 1. **Hero/About Separation**
+
+- **Hero Model**: Landing page data (avatar, greeting, title, description, resumeLink)
+- **About Model**: Simplified to bio and summary only
+- **Endpoints**: Separate CRUD for better organization
+
+#### 2. **Multi-Category Tech Stack**
+
+- **Before**: Single category per tech stack
+- **Now**: Multiple categories per tech stack (e.g., Next.js in both frontend & backend)
+- **Categories**: languages, frontend, backend, mobile, database, devops_cloud, tools
+- **Proficiency Level**: Optional 1-5 rating system
+
+#### 3. **Cascade Update System**
+
+- **Auto-sync**: When tech stack name/icon changes, all projects using it auto-update
+- **Format Support**: Both string arrays and object arrays in projects
+- **Performance**: Bulk MongoDB operations (not N+1 queries)
+
+#### 4. **Education with Attachments**
+
+- **Certificate Support**: Array of certificates/transcripts with ImageKit URLs
+- **Types**: formal, bootcamp, certification, course
+- **Attachments**: `{ title, url, fileId }` structure
+
+#### 5. **Reorder Endpoints**
+
+- **Entities**: Projects, Experiences, Tech Stacks, Educations
+- **Method**: PATCH `/api/{entity}/reorder`
+- **Implementation**: MongoDB bulkWrite for performance
+
+#### 6. **Vercel Deployment Ready**
+
+- **Serverless**: Configured for Vercel Functions
+- **Build**: TypeScript to JavaScript compilation
+- **Environment**: Production environment variables
+
+### 🔄 **Enhanced Features**
+
+#### **CRUD Operations**
+
+- Full CRUD for Projects, Experiences, Services, Tech Stacks, Educations
+- Create/Update for Hero and About (single document collections)
+- Create/Read/Delete for Contact Messages
+
+#### **Soft Delete (Recycle Bin)**
+
+Available for: Projects, Experiences, Services, Tech Stacks
+
+Each entity has 8 actions:
+
+- **CRUD**: Create, Read, Update, Delete (soft)
+- **Trash Management**: Get Trash, Restore, Force Delete (permanent)
+
+#### **File Upload (ImageKit)**
+
+- **Single & Multiple**: Upload endpoints with category organization
+- **Folders**: Organized structure
+  - `/portfolio/hero` - Avatar images
+  - `/portfolio/projects` - Project images
+  - `/portfolio/experiences` - Experience images
+  - `/portfolio/services` - Service icons
+  - `/portfolio/techstacks` - Tech stack logos
+  - `/portfolio/about` - About images
+  - `/portfolio/educations` - Education certificates
+
+#### **AI Chatbot (Google Gemini)**
+
+- **Context-Aware**: Uses portfolio data for intelligent responses
+- **Session Management**: Chat history with expiration
+- **Portfolio Context**: Auto-generated context from Hero, About, Projects, etc.
+
+#### **Security & Performance**
+
+- **JWT Authentication**: Access & refresh tokens
+- **Password Security**: bcrypt hashing
+- **Rate Limiting**: Different limits per endpoint type
+- **CORS Protection**: Configurable allowed origins
+- **Security Headers**: Helmet middleware
+- **Input Sanitization**: Custom MongoDB injection & XSS protection
 
 ---
 
 ## ⚙️ Installation & Setup
 
-### 1. Clone Repository
+### **1. Clone Repository**
 
 ```bash
-git clone https://github.com/irpanzy/Portofolio-Irpanzy-BE.git
+git clone <repository-url>
 cd portofolio-irpanzy-be
 ```
 
-### 2. Install Dependencies
+### **2. Install Dependencies**
 
 ```bash
 npm install
 ```
 
-### 3. Environment Variables
+### **3. Environment Configuration**
 
-Buat file `.env` di root project dan sesuaikan nilainya:
+Copy `.env.example` to `.env` and configure:
 
 ```env
-# Server
-PORT=8000
+# Server Configuration
 NODE_ENV=development
+PORT=3000
 
-# Database (MongoDB Atlas / Local)
-DATABASE_URL=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority
-
-# ImageKit Storage
-IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
-IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
-IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id
-MAX_FILE_SIZE=5242880 # 5 MB dalam bytes
-
-# Google Gemini AI
-GEMINI_API_KEY=your_gemini_api_key
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/portfolio
+# For production: mongodb+srv://user:pass@cluster.mongodb.net/portfolio
 
 # JWT Configuration
-JWT_SECRET=your_super_secret_jwt_key_min_20_chars
-JWT_EXPIRES_IN=7d
-JWT_REFRESH_SECRET=your_super_secret_refresh_key_min_20_chars
-JWT_REFRESH_EXPIRES_IN=30d
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 
-# Default Admin (digunakan saat database seeding)
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=YourStrongAdminPassword123
+# ImageKit Configuration
+IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
+IMAGEKIT_PRIVATE_KEY=your-imagekit-private-key
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your-id
 
-# CORS Allowed Origins (pisahkan dengan koma)
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173,https://your-frontend.vercel.app
+# Google Gemini AI Configuration
+GEMINI_API_KEY=your-gemini-api-key
+
+# CORS Configuration
+CLIENT_URL=http://localhost:3001
+# For production: https://your-frontend.vercel.app
 ```
 
-### 4. Database Seeding
+### **4. Database Setup**
 
-Jalankan seeder untuk membuat akun Administrator awal dari konfigurasi `.env`:
+Start MongoDB locally or use MongoDB Atlas, then seed admin user:
 
 ```bash
+# Create admin user
 npm run seed
-```
 
-Jika ingin memaksa overwrite admin yang sudah ada:
-
-```bash
+# Force recreate admin (if exists)
 npm run seed:force
 ```
 
-### 5. Run Development Server
+### **5. Development Server**
 
 ```bash
 npm run dev
 ```
 
-Server akan aktif di: `http://localhost:8000` (Health check: `http://localhost:8000/health`)
+Server runs at `http://localhost:3000`
 
 ---
 
 ## 📝 Available Scripts
 
-| Command                | Keterangan                                                            |
-| ---------------------- | --------------------------------------------------------------------- |
-| `npm run dev`          | Menjalankan server development dengan auto-reload (tsx + nodemon)     |
-| `npm run build`        | Menjalankan TypeScript compiler (`tsc`) ke folder `dist/`             |
-| `npm start`            | Menjalankan build JavaScript di lingkungan production (`dist/app.js`) |
-| `npm run seed`         | Membuat user admin awal ke database                                   |
-| `npm run seed:force`   | Menghapus dan membuat ulang user admin                                |
-| `npm run format`       | Melakukan formatting kode ke seluruh file dengan Prettier             |
-| `npm run format:check` | Memeriksa formatting kode tanpa mengubah file                         |
+```bash
+# Development
+npm run dev          # Start development server with hot reload
+
+# Build & Production
+npm run build        # Build TypeScript to JavaScript
+npm run start        # Start production server (requires build)
+
+# Database
+npm run seed         # Create default admin user
+npm run seed:force   # Force recreate admin user
+
+# Code Quality
+npm run format       # Format code with Prettier
+npm run format:check # Check code formatting
+
+# Testing
+npm test             # Run tests (placeholder)
+```
 
 ---
 
-## 📡 API Endpoints Overview
+## 📡 API Documentation
 
-Semua route API diawali dengan prefix `/api`.
+For complete API documentation including all endpoints, request/response examples, authentication, and testing guides, please see:
 
-### 1. Public Endpoints
+**➡️ [API Contract Documentation](docs/API_CONTRACT.md)**
 
-- **Hero**: `GET /api/hero`
-- **About**: `GET /api/about`
-- **Educations**: `GET /api/educations`, `GET /api/educations/:id`
-- **Experiences**: `GET /api/experiences`, `GET /api/experiences/:id`
-- **Projects**: `GET /api/projects`, `GET /api/projects/:id`
-- **Services**: `GET /api/services`, `GET /api/services/:id`
-- **Tech Stacks**: `GET /api/techstacks` _(support query filter: `?category=frontend`)_, `GET /api/techstacks/:id`
-- **Contact Form**: `POST /api/contact`
-- **AI Chatbot**: `POST /api/chat`
-- **Health Check**: `GET /health`
+### **Quick Reference**
 
-### 2. Authentication (`/api/auth`)
+- **Base URL**: `http://localhost:3000/api` (development) | `https://your-project.vercel.app/api` (production)
+- **Authentication**: JWT Bearer token for admin endpoints
+- **Response Format**: Standardized JSON with `statusCode`, `message`, and `data` fields
 
-- `POST /api/auth/login` - Login admin & mendapatkan accessToken + refreshToken
-- `POST /api/auth/refresh` - Refresh access token yang kadaluarsa
-- `GET /api/auth/profile` - Ambil profil admin _(Auth Required)_
-- `PUT /api/auth/password` - Ganti password admin _(Auth Required)_
+### **Main Endpoint Categories**
 
-### 3. Protected / Admin Endpoints _(Bearer Token Required)_
+| Category              | Endpoints                 | Description                     |
+| --------------------- | ------------------------- | ------------------------------- |
+| **🏠 Hero & About**   | `/api/hero`, `/api/about` | Landing page and about data     |
+| **👤 Authentication** | `/api/auth/*`             | Admin login, refresh, logout    |
+| **💼 Projects**       | `/api/projects`           | Portfolio projects with reorder |
+| **💻 Experiences**    | `/api/experiences`        | Work experiences with reorder   |
+| **🎓 Education**      | `/api/educations`         | Education with attachments      |
+| **🛠️ Tech Stack**     | `/api/techstacks`         | Multi-category tech stacks      |
+| **🚀 Services**       | `/api/services`           | Services offered                |
+| **📞 Contact**        | `/api/contact`            | Contact form submissions        |
+| **🤖 AI Chat**        | `/api/chat`               | AI chatbot integration          |
+| **📁 File Upload**    | `/api/upload`             | ImageKit file management        |
 
-- **Hero & About**:
-  - `POST /api/hero`, `PUT /api/hero`
-  - `POST /api/about`, `PUT /api/about`
-- **CRUD & Soft Delete** (`/projects`, `/experiences`, `/educations`, `/services`, `/techstacks`):
-  - `POST /api/<module>` - Tambah data baru
-  - `PUT /api/<module>/:id` - Update data
-  - `DELETE /api/<module>/:id` - Pindahkan data ke Trash (Soft Delete)
-  - `GET /api/<module>/trash/all` - Lihat data di Trash
-  - `PATCH /api/<module>/:id/restore` - Pulihkan data dari Trash
-  - `DELETE /api/<module>/:id/force` - Hapus permanen
-- **Reordering** (`PATCH /api/<module>/reorder`):
-  - `PATCH /api/projects/reorder`
-  - `PATCH /api/educations/reorder`
-  - `PATCH /api/experiences/reorder`
-  - `PATCH /api/techstacks/reorder`
-- **Media Upload** (`/api/upload`):
-  - `POST /api/upload/single` - Upload 1 gambar ke ImageKit
-  - `POST /api/upload/multiple` - Upload banyak gambar sekaligus
-  - `DELETE /api/upload/:fileId` - Hapus gambar dari ImageKit
-- **Contact & Chat Management**:
-  - `GET /api/contact`, `GET /api/contact/:id`, `DELETE /api/contact/:id`
-  - `GET /api/chat/history`, `GET /api/chat/history/:id`, `DELETE /api/chat/history/:id`, `DELETE /api/chat/history`
+````
 
 ---
 
-## 🚀 Deployment to Vercel
+## 🧪 Quick Testing
 
-Backend ini sudah dikonfigurasi untuk berjalan mulus di **Vercel Serverless Functions**:
+### **Health Check**
+```bash
+curl http://localhost:3000/health
+````
 
-1. Pastikan file [vercel.json](file:///d:/Coding/Express/portofolio-irpanzy-be/vercel.json) menggunakan format Zero-Config:
-   ```json
-   {
-     "version": 2,
-     "rewrites": [
-       {
-         "source": "/(.*)",
-         "destination": "/api"
-       }
-     ],
-     "functions": {
-       "api/index.ts": {
-         "maxDuration": 30
-       }
-     }
-   }
-   ```
-2. Hubungkan repository ke dashboard Vercel.
-3. Masukkan seluruh environment variables yang dibutuhkan di **Project Settings** > **Environment Variables**.
-4. Deploy!
+### **Get Hero Data**
 
-Panduan langkah demi langkah lengkap dapat dilihat di [docs/VERCEL_DEPLOYMENT.md](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/VERCEL_DEPLOYMENT.md).
+```bash
+curl http://localhost:3000/api/hero
+```
+
+### **Login & Get Token**
+
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@example.com", "password": "your-password"}'
+```
+
+For complete testing examples and all endpoints, see the **[API Contract Documentation](docs/API_CONTRACT.md)**.
 
 ---
 
-## 📚 Complete Documentation
+## 📚 Documentation
 
-Detail kontrak request/response dan panduan teknis tersedia di folder `docs/`:
+- **[API Contract](docs/API_CONTRACT.md)** - Complete API documentation with all endpoints, request/response examples, and testing guide
 
-- 📖 [API Contract Documentation](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/API_CONTRACT.md)
-- 🚀 [Vercel Deployment Guide](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/VERCEL_DEPLOYMENT.md)
-- 🎓 [Education & Attachments API](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/EDUCATION_API.md)
-- 🔄 [Drag & Drop Reorder API](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/REORDER_API.md)
-- 🛠️ [Backend Restructure V2 Guide](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/BACKEND_RESTRUCTURE_V2.md)
-- 📋 [Pre-Deployment Checklist](file:///d:/Coding/Express/portofolio-irpanzy-be/docs/DEPLOYMENT_CHECKLIST.md)
+---
+
+## 🔐 Database Models
+
+| Model           | Description           | Key Features                                      |
+| --------------- | --------------------- | ------------------------------------------------- |
+| **Admin**       | Admin authentication  | JWT tokens, password hashing                      |
+| **Hero**        | Landing page data     | Avatar, greeting, title, description, resume      |
+| **About**       | About section         | Bio, summary                                      |
+| **Project**     | Portfolio projects    | Tech stack arrays, soft delete, reorder           |
+| **Experience**  | Work experiences      | Soft delete, reorder                              |
+| **Education**   | Education history     | Attachments array, types, reorder                 |
+| **Service**     | Services offered      | Soft delete                                       |
+| **TechStack**   | Technologies & skills | Multi-category, proficiency, soft delete, reorder |
+| **Contact**     | Contact messages      | Form submissions                                  |
+| **ChatHistory** | AI conversations      | Session-based, auto-expiry                        |
+
+---
+
+## 🌐 Frontend Integration
+
+### **Frontend Repository**
+
+- **Location**: `D:\Coding\Next\Portofolio-Irpanzy`
+- **Framework**: Next.js
+- **Development**: `http://localhost:3001`
+- **Production**: `https://irfanmuria.vercel.app`
+
+### **API Integration Example**
+
+```typescript
+// lib/api/config.ts
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+// lib/api/hero.ts
+export async function getHero() {
+  const res = await fetch(`${API_URL}/api/hero`);
+  if (!res.ok) throw new Error("Failed to fetch hero data");
+  return res.json();
+}
+
+// lib/api/techstack.ts
+export async function getTechStacksByCategory(category: string) {
+  const res = await fetch(`${API_URL}/api/techstacks?category=${category}`);
+  if (!res.ok) throw new Error("Failed to fetch tech stacks");
+  return res.json();
+}
+```
+
+---
+
+## 🔧 Development Notes
+
+### **Code Standards**
+
+- **ES Modules**: Using import/export (not CommonJS require)
+- **Named Exports**: No default exports for consistency
+- **TypeScript Strict**: Enabled for type safety
+- **Prettier**: Code formatting with consistent style
+
+### **Architecture Decisions**
+
+- **Denormalized Tech Stack**: Store names in projects for performance (with cascade update)
+- **Soft Delete**: Preserve data integrity with recycle bin functionality
+- **Single Document Collections**: Hero and About are singleton models
+- **Mixed Schema**: Project techStack supports both string and object arrays
+
+### **Performance Optimizations**
+
+- **Bulk Operations**: MongoDB bulkWrite for reorder operations
+- **Indexed Queries**: Proper indexing for frequently queried fields
+- **Connection Pooling**: Mongoose connection optimization
+- **Rate Limiting**: Prevent API abuse
+
+---
+
+## 🚀 Deployment
+
+### **Vercel**
+
+```bash
+# 1. Push to GitHub
+git push origin main
+
+# 2. Import to Vercel
+# - Connect GitHub repository
+# - Configure environment variables
+# - Deploy!
+
+# 3. Production URL
+https://your-project.vercel.app
+```
+
+**Complete deployment instructions available in the API Contract documentation.**
+
+### **Environment Requirements**
+
+- **Node.js**: 18+
+- **MongoDB**: Atlas (recommended) or self-hosted
+- **ImageKit**: Account for file storage
+- **Google Gemini**: API key for AI features
+
+---
+
+## 📈 Performance & Monitoring
+
+### **Built-in Monitoring**
+
+- **Morgan Logging**: HTTP request logging
+- **Error Handling**: Centralized error middleware
+- **Health Check**: `/health` endpoint for uptime monitoring
+
+### **Recommended Monitoring**
+
+- **Vercel Analytics**: Built-in performance monitoring
+- **MongoDB Atlas Monitoring**: Database performance
+- **Uptime Monitoring**: External service (UptimeRobot, etc.)
+
+---
+
+## 🤝 Contributing
+
+### **Code Style**
+
+- Follow existing TypeScript patterns
+- Use Prettier for formatting: `npm run format`
+- Add proper type definitions
+- Write descriptive commit messages
+
+### **Adding New Features**
+
+1. Create feature branch: `git checkout -b feature/feature-name`
+2. Implement feature with proper types and validation
+3. Add documentation to `docs/`
+4. Test endpoints with Postman/Thunder Client
+5. Submit pull request
+
+---
+
+## 📄 License
+
+**ISC License**
 
 ---
 
 ## 👤 Author
 
-**Irfan Muria (Irpanzy)**
+**Irfan Muria**
 
-- **API Version**: 1.0.0
-- **License**: ISC
-- **Last Updated**: 31 Agustus 2026
+- **Portfolio**: [irfanmuria.vercel.app](https://irfanmuria.vercel.app)
+- **GitHub**: [@irpanzy](https://github.com/irpanzy)
+- **Email**: irfanmuria04@gmail.com
+
+---
+
+## 🎯 Project Status
+
+- ✅ **Core API**: Complete
+- ✅ **Authentication**: JWT implemented
+- ✅ **File Upload**: ImageKit integration
+- ✅ **AI Chat**: Gemini integration
+- ✅ **Multi-Category Tech Stack**: Implemented
+- ✅ **Cascade Update**: Implemented
+- ✅ **Education API**: Implemented
+- ✅ **Reorder Endpoints**: Implemented
+- ✅ **Vercel Deployment**: Ready
+- 🔄 **Frontend Integration**: In Progress
+- 📝 **API Documentation**: Complete
+
+---
+
+**API Version**: 2.0.0  
+**Last Updated**: December 2024  
+**Node.js**: 18+  
+**TypeScript**: 7.0+
