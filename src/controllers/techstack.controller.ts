@@ -38,12 +38,35 @@ export const createTechStack = asyncHandler(
 
 export const updateTechStack = asyncHandler(
   async (req: Request, res: Response) => {
+    const oldTechStack = await TechStack.findOne({
+      _id: req.params.id,
+      deletedAt: null,
+    });
+    if (!oldTechStack) throw new ApiError(404, "Tech stack not found");
+
+    const oldTitle = oldTechStack.title;
+
     const techStack = await TechStack.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
       req.body,
       { new: true, runValidators: true }
     );
-    if (!techStack) throw new ApiError(404, "Tech stack not found");
+
+    if (req.body.title && req.body.title !== oldTitle) {
+      const { Project } = await import("../models/index.js");
+
+      await Project.updateMany(
+        { techStack: oldTitle, deletedAt: null },
+        { $set: { "techStack.$": req.body.title } }
+      );
+
+      await Project.updateMany(
+        { "techStack.title": oldTitle, deletedAt: null },
+        { $set: { "techStack.$[elem].title": req.body.title } },
+        { arrayFilters: [{ "elem.title": oldTitle }] }
+      );
+    }
+
     res.json(new ApiResponse(200, "Tech stack updated", techStack));
   }
 );
