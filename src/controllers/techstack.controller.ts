@@ -54,8 +54,10 @@ export const updateTechStack = asyncHandler(
 
     const titleChanged = req.body.title && req.body.title !== oldTitle;
     const iconChanged = req.body.icon !== undefined;
+    const iconLightChanged = req.body.iconLight !== undefined;
+    const iconDarkChanged = req.body.iconDark !== undefined;
 
-    if (titleChanged || iconChanged) {
+    if (titleChanged || iconChanged || iconLightChanged || iconDarkChanged) {
       const targetTitle = req.body.title || oldTitle;
       const escapedOld = oldTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const titleRegex = new RegExp(`^${escapedOld}$`, "i");
@@ -73,6 +75,12 @@ export const updateTechStack = asyncHandler(
       }
       if (iconChanged) {
         setObj["techStack.$[elem].icon"] = req.body.icon;
+      }
+      if (iconLightChanged) {
+        setObj["techStack.$[elem].iconLight"] = req.body.iconLight;
+      }
+      if (iconDarkChanged) {
+        setObj["techStack.$[elem].iconDark"] = req.body.iconDark;
       }
 
       if (Object.keys(setObj).length > 0) {

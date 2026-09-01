@@ -4,6 +4,10 @@ export const createTechStackSchema = z.object({
   title: z.string().min(1, "Title is required"),
   icon: z.string().url().optional(),
   iconFileId: z.string().optional(),
+  iconLight: z.string().url().optional(),
+  iconLightFileId: z.string().optional(),
+  iconDark: z.string().url().optional(),
+  iconDarkFileId: z.string().optional(),
   categories: z
     .array(
       z.enum([
@@ -25,6 +29,10 @@ export const updateTechStackSchema = z.object({
   title: z.string().min(1, "Title is required").optional(),
   icon: z.string().url().optional(),
   iconFileId: z.string().optional(),
+  iconLight: z.string().url().optional(),
+  iconLightFileId: z.string().optional(),
+  iconDark: z.string().url().optional(),
+  iconDarkFileId: z.string().optional(),
   categories: z
     .array(
       z.enum([

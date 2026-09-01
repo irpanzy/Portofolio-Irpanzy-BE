@@ -6,6 +6,10 @@ const techStackSchema = new Schema<ITechStack>(
     title: { type: String, required: true },
     icon: { type: String, required: false },
     iconFileId: { type: String, required: false },
+    iconLight: { type: String, required: false },
+    iconLightFileId: { type: String, required: false },
+    iconDark: { type: String, required: false },
+    iconDarkFileId: { type: String, required: false },
     categories: {
       type: [String],
       enum: [

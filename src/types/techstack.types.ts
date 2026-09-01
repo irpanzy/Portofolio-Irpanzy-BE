@@ -13,6 +13,10 @@ export interface ITechStack extends Document {
   title: string;
   icon?: string;
   iconFileId?: string;
+  iconLight?: string;
+  iconLightFileId?: string;
+  iconDark?: string;
+  iconDarkFileId?: string;
   categories: TechCategory[];
   proficiencyLevel?: number | null;
   order: number;
@@ -28,6 +32,10 @@ export interface CreateTechStackDTO {
   order?: number;
   icon?: string;
   iconFileId?: string;
+  iconLight?: string;
+  iconLightFileId?: string;
+  iconDark?: string;
+  iconDarkFileId?: string;
   proficiencyLevel?: number;
 }
 
@@ -37,5 +45,9 @@ export interface UpdateTechStackDTO {
   order?: number;
   icon?: string;
   iconFileId?: string;
+  iconLight?: string;
+  iconLightFileId?: string;
+  iconDark?: string;
+  iconDarkFileId?: string;
   proficiencyLevel?: number;
 }

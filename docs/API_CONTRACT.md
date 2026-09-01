@@ -817,8 +817,12 @@ GET /api/techstacks?category=frontend
     {
       "_id": "674a1b2c3d4e5f6a7b8c9d40",
       "title": "Next.js",
-      "icon": "https://ik.imagekit.io/portfolio/nextjs-icon.svg",
+      "icon": "https://ik.imagekit.io/portfolio/nextjs-universal.svg",
       "iconFileId": "6748abc123def456",
+      "iconLight": "https://ik.imagekit.io/portfolio/nextjs-light.svg",
+      "iconLightFileId": "6748abc123def457",
+      "iconDark": "https://ik.imagekit.io/portfolio/nextjs-dark.svg",
+      "iconDarkFileId": "6748abc123def458",
       "categories": ["frontend", "backend"],
       "proficiencyLevel": 4,
       "order": 1,
@@ -829,8 +833,12 @@ GET /api/techstacks?category=frontend
     {
       "_id": "674a1b2c3d4e5f6a7b8c9d41",
       "title": "TypeScript",
-      "icon": "https://ik.imagekit.io/portfolio/typescript-icon.svg",
-      "iconFileId": "6748abc123def457",
+      "icon": "https://ik.imagekit.io/portfolio/typescript-universal.svg",
+      "iconFileId": "6748abc123def459",
+      "iconLight": null,
+      "iconLightFileId": null,
+      "iconDark": null,
+      "iconDarkFileId": null,
       "categories": ["languages"],
       "proficiencyLevel": 5,
       "order": 2,
@@ -882,7 +890,7 @@ Content-Type: application/json
 6. **devops_cloud** - DevOps & Cloud (Docker, AWS, Kubernetes, etc.)
 7. **tools** - Development tools (Git, VSCode, Postman, etc.)
 
-### **Update Tech Stack** 🔄 (with Cascade Update)
+### **Update Tech Stack** 🔄 (with Cascade Update & Theme Icons)
 
 ```
 PUT /api/techstacks/:id
@@ -895,13 +903,18 @@ Content-Type: application/json
 ```json
 {
   "title": "React.js",
-  "icon": "https://ik.imagekit.io/portfolio/react-new-icon.svg",
+  "icon": "https://ik.imagekit.io/portfolio/react-universal.svg",
+  "iconLight": "https://ik.imagekit.io/portfolio/react-light.svg",
+  "iconDark": "https://ik.imagekit.io/portfolio/react-dark.svg",
   "categories": ["frontend"],
   "proficiencyLevel": 5
 }
 ```
 
-**⚠️ Important**: When `title` or `icon` is updated, it automatically cascades to all projects using this tech stack (both string and object formats).
+**Theme Icon Support** 🎨:
+All icon types (`icon`, `iconLight`, `iconDark`) support cascade update to projects.
+
+**⚠️ Important**: When `title` or any icon field is updated, it automatically cascades to all projects using this tech stack (both string and object formats).
 
 **Response Success (200)**:
 
@@ -1457,16 +1470,30 @@ curl -X DELETE http://localhost:3000/api/projects/674a1b2c3d4e5f6a7b8c9d10 \
 ### **Tech Stack with Multi-Category**
 
 ```bash
-# Create tech stack with multiple categories
+# Create tech stack with theme-specific icons
 curl -X POST http://localhost:3000/api/techstacks \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "Next.js",
-    "icon": "https://ik.imagekit.io/portfolio/nextjs.svg",
-    "categories": ["frontend", "backend"],
-    "proficiencyLevel": 4,
+    "title": "React",
+    "icon": "https://ik.imagekit.io/portfolio/react-universal.svg",
+    "iconLight": "https://ik.imagekit.io/portfolio/react-light.svg",
+    "iconDark": "https://ik.imagekit.io/portfolio/react-dark.svg",
+    "categories": ["frontend"],
+    "proficiencyLevel": 5,
     "order": 1
+  }'
+
+# Create tech stack with universal icon only
+curl -X POST http://localhost:3000/api/techstacks \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Node.js",
+    "icon": "https://ik.imagekit.io/portfolio/nodejs.svg",
+    "categories": ["backend"],
+    "proficiencyLevel": 4,
+    "order": 2
   }'
 
 # Filter by category
@@ -1663,3 +1690,75 @@ For technical support or questions about this API:
 ---
 
 **© 2024 Portfolio API - Built with Express.js & TypeScript**
+
+---
+
+## 🎨 Theme-Specific Icons Feature
+
+Tech Stack now supports 3 types of icons for better theme compatibility:
+
+### **Icon Types**
+
+1. **Universal Icon** (`icon` + `iconFileId`)
+   - Fallback icon that works on both light and dark themes
+   - Required when creating tech stacks
+   - Used when theme-specific icons are not available
+
+2. **Light Mode Icon** (`iconLight` + `iconLightFileId`)
+   - Optimized for light theme backgrounds
+   - Optional field
+   - Takes priority over universal icon in light mode
+
+3. **Dark Mode Icon** (`iconDark` + `iconDarkFileId`)
+   - Optimized for dark theme backgrounds
+   - Optional field
+   - Takes priority over universal icon in dark mode
+
+### **Frontend Integration**
+
+```javascript
+function getTechStackIcon(tech, theme) {
+  // Priority: theme-specific > universal > default
+  if (theme === "light" && tech.iconLight) {
+    return tech.iconLight;
+  }
+  if (theme === "dark" && tech.iconDark) {
+    return tech.iconDark;
+  }
+  return tech.icon || "/default-tech-icon.svg";
+}
+```
+
+### **API Examples**
+
+```bash
+# Create with all icon types
+curl -X POST http://localhost:3000/api/techstacks \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "React",
+    "icon": "https://ik.imagekit.io/portfolio/react-universal.svg",
+    "iconLight": "https://ik.imagekit.io/portfolio/react-light.svg",
+    "iconDark": "https://ik.imagekit.io/portfolio/react-dark.svg",
+    "categories": ["frontend"]
+  }'
+
+# Update only dark mode icon
+curl -X PUT http://localhost:3000/api/techstacks/:id \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "iconDark": "https://ik.imagekit.io/portfolio/react-new-dark.svg"
+  }'
+```
+
+### **Cascade Update Support**
+
+All icon types support cascade updates:
+
+- When `icon`, `iconLight`, or `iconDark` is updated
+- Changes automatically propagate to all projects using this tech stack
+- Both string and object format project references are updated
+
+This ensures consistency across the portfolio when tech stack visuals are updated! 🚀
