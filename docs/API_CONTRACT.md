@@ -1,11 +1,21 @@
-# Portfolio API Contract Documentation
+# 📚 Portfolio API Contract Documentation
 
-## Base URL
+**Version**: 2.0.0  
+**Last Updated**: December 2024  
+**Base Framework**: Express.js + TypeScript + MongoDB
 
-- **Development**: `http://localhost:8000/api`
-- **Production**: `https://your-domain.com/api`
+---
 
-## Authentication
+## 🌐 Base URL
+
+- **Development**: `http://localhost:3000/api`
+- **Production**: `https://your-project.vercel.app/api`
+
+---
+
+## 🔐 Authentication
+
+### **JWT Bearer Token**
 
 Most admin endpoints require JWT authentication. Include the token in the Authorization header:
 
@@ -13,9 +23,16 @@ Most admin endpoints require JWT authentication. Include the token in the Author
 Authorization: Bearer <your_jwt_token>
 ```
 
-## Common Response Format
+### **Token Types**
 
-### Success Response
+- **Access Token**: Short-lived (7 days), used for API requests
+- **Refresh Token**: Long-lived (30 days), used to get new access tokens
+
+---
+
+## 📊 Response Format
+
+### **Success Response**
 
 ```json
 {
@@ -25,421 +42,523 @@ Authorization: Bearer <your_jwt_token>
 }
 ```
 
-### Error Response
+### **Error Response**
 
 ```json
 {
   "statusCode": 400,
   "message": "Error message",
+  "success": false,
   "errors": []
 }
 ```
 
-## Rate Limiting
+---
 
-- General endpoints: 100 requests per 15 minutes
-- Auth endpoints: 5 requests per 15 minutes
-- Chat endpoints: 10 requests per 15 minutes
-- Contact endpoints: 3 requests per 15 minutes
+## 🚦 Rate Limiting
+
+| Endpoint Type      | Limit        | Window     |
+| ------------------ | ------------ | ---------- |
+| **General**        | 100 requests | 15 minutes |
+| **Authentication** | 5 requests   | 15 minutes |
+| **Chat**           | 10 requests  | 15 minutes |
+| **Contact**        | 3 requests   | 15 minutes |
 
 ---
 
-## 1. Authentication (`/api/auth`)
+## 📋 API Endpoints
 
-### 1.1 Login
+### **Endpoint Categories**
 
-**POST** `/api/auth/login`
+1. [🏠 Hero & About](#-hero--about) - Landing page data
+2. [👤 Authentication](#-authentication) - Admin login system
+3. [💼 Projects](#-projects) - Portfolio projects
+4. [💻 Experiences](#-experiences) - Work experiences
+5. [🎓 Education](#-education) - Education with attachments
+6. [🛠️ Tech Stack](#️-tech-stack) - Multi-category technologies
+7. [🚀 Services](#-services) - Services offered
+8. [📞 Contact](#-contact) - Contact form
+9. [🤖 AI Chat](#-ai-chat) - AI chatbot
+10. [📁 File Upload](#-file-upload) - ImageKit integration
 
-Login admin user and get JWT token.
+---
 
-**Rate Limit**: 5 req/15min
+## 🏠 Hero & About
 
-**Request Body:**
+### **Hero API** (Landing Page Data)
+
+#### **Get Hero Data**
+
+```
+GET /api/hero
+```
+
+**Description**: Get hero/landing page data (public endpoint)
+
+**Response Success (200)**:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Hero data retrieved successfully",
+  "data": {
+    "_id": "674a1b2c3d4e5f6a7b8c9d0e",
+    "avatarImage": "https://ik.imagekit.io/portfolio/avatar.png",
+    "avatarImageFileId": "6748abc123def456",
+    "greeting": "Hello! I'm Irfan Muria",
+    "title": "Fullstack Web Developer Enthusiast",
+    "description": "I build modern fullstack applications with React, Node.js, and cutting-edge technologies.",
+    "resumeLink": "https://drive.google.com/file/d/your-resume-id",
+    "createdAt": "2024-12-01T10:00:00.000Z",
+    "updatedAt": "2024-12-01T10:00:00.000Z"
+  }
+}
+```
+
+**Response Error (404)**:
+
+```json
+{
+  "statusCode": 404,
+  "message": "Hero data not found",
+  "success": false
+}
+```
+
+#### **Create Hero Data**
+
+```
+POST /api/hero
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "avatarImage": "https://ik.imagekit.io/portfolio/avatar.png",
+  "avatarImageFileId": "6748abc123def456",
+  "greeting": "Hello! I'm Irfan Muria",
+  "title": "Fullstack Web Developer Enthusiast",
+  "description": "I build modern fullstack applications with React, Node.js, and cutting-edge technologies.",
+  "resumeLink": "https://drive.google.com/file/d/your-resume-id"
+}
+```
+
+**Validation Rules**:
+
+- `avatarImage`: Required string (min 1 character)
+- `avatarImageFileId`: Optional string
+- `greeting`: Optional string (default: "Hello! I'm Irfan Muria")
+- `title`: Required string (min 1 character)
+- `description`: Required string (min 1 character)
+- `resumeLink`: Required string (must be valid URL)
+
+**Response Success (201)**:
+
+```json
+{
+  "statusCode": 201,
+  "message": "Hero data created successfully",
+  "data": {
+    "_id": "674a1b2c3d4e5f6a7b8c9d0e",
+    "avatarImage": "https://ik.imagekit.io/portfolio/avatar.png",
+    "avatarImageFileId": "6748abc123def456",
+    "greeting": "Hello! I'm Irfan Muria",
+    "title": "Fullstack Web Developer Enthusiast",
+    "description": "I build modern fullstack applications...",
+    "resumeLink": "https://drive.google.com/file/d/your-resume-id",
+    "createdAt": "2024-12-01T10:00:00.000Z",
+    "updatedAt": "2024-12-01T10:00:00.000Z"
+  }
+}
+```
+
+**Response Error (400)** - If hero already exists:
+
+```json
+{
+  "statusCode": 400,
+  "message": "Hero data already exists. Use PUT to update.",
+  "success": false
+}
+```
+
+#### **Update Hero Data**
+
+```
+PUT /api/hero
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body** (all fields optional):
+
+```json
+{
+  "avatarImage": "https://ik.imagekit.io/portfolio/avatar-new.png",
+  "avatarImageFileId": "new-file-id",
+  "greeting": "Hi! I'm Irfan",
+  "title": "Senior Fullstack Developer",
+  "description": "Updated description...",
+  "resumeLink": "https://drive.google.com/file/d/new-resume-id"
+}
+```
+
+**Response Success (200)**:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Hero data updated successfully",
+  "data": {
+    "_id": "674a1b2c3d4e5f6a7b8c9d0e",
+    "avatarImage": "https://ik.imagekit.io/portfolio/avatar-new.png",
+    "greeting": "Hi! I'm Irfan",
+    "title": "Senior Fullstack Developer",
+    "description": "Updated description...",
+    "resumeLink": "https://drive.google.com/file/d/new-resume-id",
+    "createdAt": "2024-12-01T10:00:00.000Z",
+    "updatedAt": "2024-12-01T14:00:00.000Z"
+  }
+}
+```
+
+### **About API** (About Section Data)
+
+#### **Get About Data**
+
+```
+GET /api/about
+```
+
+**Response Success (200)**:
+
+```json
+{
+  "statusCode": 200,
+  "message": "About data retrieved successfully",
+  "data": {
+    "_id": "674a1b2c3d4e5f6a7b8c9d0f",
+    "bio": "I'm a passionate fullstack developer with 3+ years of experience in building modern web applications. I love learning new technologies and solving complex problems.",
+    "summary": "Fullstack Developer | React & Node.js Enthusiast",
+    "createdAt": "2024-12-01T10:00:00.000Z",
+    "updatedAt": "2024-12-01T10:00:00.000Z"
+  }
+}
+```
+
+#### **Create About Data**
+
+```
+POST /api/about
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "bio": "I'm a passionate fullstack developer with 3+ years of experience...",
+  "summary": "Fullstack Developer | React & Node.js Enthusiast"
+}
+```
+
+**Validation Rules**:
+
+- `bio`: Required string (min 10 characters)
+- `summary`: Optional string
+
+#### **Update About Data**
+
+```
+PUT /api/about
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body** (all fields optional):
+
+```json
+{
+  "bio": "Updated bio text...",
+  "summary": "Updated summary"
+}
+```
+
+---
+
+## 👤 Authentication
+
+### **Login**
+
+```
+POST /api/auth/login
+Content-Type: application/json
+```
+
+**Request Body**:
 
 ```json
 {
   "email": "admin@example.com",
-  "password": "password123"
+  "password": "your-password"
 }
 ```
 
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
   "message": "Login successful",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
     "admin": {
-      "_id": "507f1f77bcf86cd799439011",
+      "_id": "674a1b2c3d4e5f6a7b8c9abc",
       "email": "admin@example.com",
-      "name": "Admin"
+      "createdAt": "2024-12-01T10:00:00.000Z"
     }
   }
 }
 ```
 
-**Errors:**
-
-- `400`: Missing required fields
-- `401`: Invalid credentials
-- `429`: Too many requests
-
----
-
-### 1.2 Refresh Token
-
-**POST** `/api/auth/refresh`
-
-Get new access token and refresh token using old refresh token.
-
-**Rate Limit**: None (public endpoint, no auth middleware)
-
-**Request Body:**
+**Response Error (401)**:
 
 ```json
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "statusCode": 401,
+  "message": "Invalid email or password",
+  "success": false
 }
 ```
 
-**Response (200):**
+### **Refresh Token**
+
+```
+POST /api/auth/refresh
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
   "message": "Token refreshed successfully",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "admin": {
-      "email": "admin@example.com"
-    }
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
   }
 }
 ```
 
-**Errors:**
+### **Logout**
 
-- `401`: Refresh token is required
-- `401`: Invalid or expired refresh token
-- `404`: Admin not found
+```
+POST /api/auth/logout
+Authorization: Bearer <admin_token>
+```
 
----
-
-### 1.3 Get Profile
-
-**GET** `/api/auth/profile`
-
-Get authenticated admin profile.
-
-**Authentication**: Required
-
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
-  "message": "Profile retrieved successfully",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "email": "admin@example.com",
-    "name": "Admin",
-    "createdAt": "2024-01-01T00:00:00.000Z"
-  }
+  "message": "Logout successful",
+  "data": {}
 }
 ```
 
 ---
 
-### 1.4 Update Password
+## 💼 Projects
 
-**PUT** `/api/auth/password`
+### **Get All Projects**
 
-Update admin password.
-
-**Authentication**: Required
-
-**Request Body:**
-
-```json
-{
-  "currentPassword": "oldpassword123",
-  "newPassword": "newpassword123"
-}
+```
+GET /api/projects
 ```
 
-**Response (200):**
-
-```json
-{
-  "statusCode": 200,
-  "message": "Password updated successfully",
-  "data": null
-}
-```
-
----
-
-## 2. Projects (`/api/projects`)
-
-### 2.1 Get All Projects
-
-**GET** `/api/projects`
-
-Get all active projects (not deleted).
-
-**Query Parameters:**
-
-- `page` (optional): Page number, default 1
-- `limit` (optional): Items per page, default 10
-- `sort` (optional): Sort field, default "-createdAt"
-
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
   "message": "Projects retrieved successfully",
-  "data": {
-    "projects": [
-      {
-        "_id": "507f1f77bcf86cd799439011",
-        "title": "E-Commerce Platform",
-        "description": "Full-stack e-commerce solution",
-        "techStack": ["React", "Node.js", "MongoDB"],
-        "imageUrl": "https://ik.imagekit.io/...",
-        "demoUrl": "https://demo.example.com",
-        "githubUrl": "https://github.com/user/repo",
-        "featured": true,
-        "order": 1,
-        "deletedAt": null,
-        "createdAt": "2024-01-01T00:00:00.000Z",
-        "updatedAt": "2024-01-01T00:00:00.000Z"
-      }
-    ],
-    "pagination": {
-      "total": 10,
-      "page": 1,
-      "pages": 1
-    }
-  }
-}
-```
-
----
-
-### 2.2 Get Single Project
-
-**GET** `/api/projects/:id`
-
-Get project by ID.
-
-**Response (200):**
-
-```json
-{
-  "statusCode": 200,
-  "message": "Project retrieved successfully",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "title": "E-Commerce Platform",
-    "description": "Full-stack e-commerce solution",
-    "techStack": ["React", "Node.js", "MongoDB"],
-    "imageUrl": "https://ik.imagekit.io/...",
-    "demoUrl": "https://demo.example.com",
-    "githubUrl": "https://github.com/user/repo",
-    "featured": true,
-    "order": 1,
-    "createdAt": "2024-01-01T00:00:00.000Z"
-  }
-}
-```
-
-**Errors:**
-
-- `404`: Project not found
-
----
-
-### 2.3 Create Project
-
-**POST** `/api/projects`
-
-Create new project.
-
-**Authentication**: Required
-
-**Request Body:**
-
-```json
-{
-  "title": "E-Commerce Platform",
-  "description": "Full-stack e-commerce solution",
-  "techStack": ["React", "Node.js", "MongoDB"],
-  "imageUrl": "https://ik.imagekit.io/...",
-  "demoUrl": "https://demo.example.com",
-  "githubUrl": "https://github.com/user/repo",
-  "featured": true,
-  "order": 1
-}
-```
-
-**Response (201):**
-
-```json
-{
-  "statusCode": 201,
-  "message": "Project created successfully",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "title": "E-Commerce Platform",
-    ...
-  }
-}
-```
-
----
-
-### 2.4 Update Project
-
-**PUT** `/api/projects/:id`
-
-Update existing project.
-
-**Authentication**: Required
-
-**Request Body:** (all fields optional)
-
-```json
-{
-  "title": "Updated Title",
-  "description": "Updated description",
-  "techStack": ["React", "Node.js"],
-  "featured": false
-}
-```
-
-**Response (200):**
-
-```json
-{
-  "statusCode": 200,
-  "message": "Project updated successfully",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "title": "Updated Title",
-    ...
-  }
-}
-```
-
----
-
-### 2.5 Delete Project (Soft Delete)
-
-**DELETE** `/api/projects/:id`
-
-Soft delete project (move to trash).
-
-**Authentication**: Required
-
-**Response (200):**
-
-```json
-{
-  "statusCode": 200,
-  "message": "Project deleted successfully",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "deletedAt": "2024-01-01T00:00:00.000Z"
-  }
-}
-```
-
----
-
-### 2.6 Get Trash
-
-**GET** `/api/projects/trash`
-
-Get all deleted projects.
-
-**Authentication**: Required
-
-**Response (200):**
-
-```json
-{
-  "statusCode": 200,
-  "message": "Trash retrieved successfully",
   "data": [
     {
-      "_id": "507f1f77bcf86cd799439011",
-      "title": "Deleted Project",
-      "deletedAt": "2024-01-01T00:00:00.000Z",
-      "deletedBy": "admin@example.com"
+      "_id": "674a1b2c3d4e5f6a7b8c9d10",
+      "title": "Portfolio Website",
+      "description": "A responsive portfolio website built with Next.js and TypeScript.",
+      "bgImage": "https://ik.imagekit.io/portfolio/project1.jpg",
+      "bgImageFileId": "6748abc123def456",
+      "demoLink": "https://portfolio.vercel.app",
+      "githubLink": "https://github.com/user/portfolio",
+      "techStack": ["Next.js", "TypeScript", "TailwindCSS"],
+      "order": 1,
+      "isVisible": true,
+      "deletedAt": null,
+      "createdAt": "2024-12-01T10:00:00.000Z",
+      "updatedAt": "2024-12-01T10:00:00.000Z"
     }
   ]
 }
 ```
 
----
+### **Get Single Project**
 
-### 2.7 Restore Project
+```
+GET /api/projects/:id
+```
 
-**PATCH** `/api/projects/:id/restore`
+### **Create Project**
 
-Restore deleted project from trash.
+```
+POST /api/projects
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
 
-**Authentication**: Required
+**Request Body**:
 
-**Response (200):**
+```json
+{
+  "title": "Portfolio Website",
+  "description": "A responsive portfolio website built with Next.js and TypeScript.",
+  "bgImage": "https://ik.imagekit.io/portfolio/project1.jpg",
+  "bgImageFileId": "6748abc123def456",
+  "demoLink": "https://portfolio.vercel.app",
+  "githubLink": "https://github.com/user/portfolio",
+  "techStack": ["Next.js", "TypeScript", "TailwindCSS"],
+  "order": 1,
+  "isVisible": true
+}
+```
+
+**Validation Rules**:
+
+- `title`: Required string (min 1 character)
+- `description`: Required string (min 10 characters)
+- `bgImage`: Required string (valid URL)
+- `bgImageFileId`: Optional string
+- `demoLink`: Optional string (valid URL)
+- `githubLink`: Optional string (valid URL)
+- `techStack`: Required array (min 1 item)
+- `order`: Optional number (default: 0)
+- `isVisible`: Optional boolean (default: true)
+
+### **Update Project**
+
+```
+PUT /api/projects/:id
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+### **Delete Project (Soft Delete)**
+
+```
+DELETE /api/projects/:id
+Authorization: Bearer <admin_token>
+```
+
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
-  "message": "Project restored successfully",
+  "message": "Project moved to trash",
   "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "deletedAt": null
+    "_id": "674a1b2c3d4e5f6a7b8c9d10",
+    "title": "Portfolio Website",
+    "deletedAt": "2024-12-01T15:00:00.000Z",
+    "deletedBy": "674a1b2c3d4e5f6a7b8c9abc"
   }
 }
 ```
 
----
+### **Reorder Projects** 🆕
 
-### 2.8 Force Delete Project
+```
+PATCH /api/projects/reorder
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
 
-**DELETE** `/api/projects/:id/force`
+**Request Body**:
 
-Permanently delete project.
+```json
+{
+  "orders": [
+    { "id": "674a1b2c3d4e5f6a7b8c9d10", "order": 1 },
+    { "id": "674a1b2c3d4e5f6a7b8c9d11", "order": 2 },
+    { "id": "674a1b2c3d4e5f6a7b8c9d12", "order": 3 }
+  ]
+}
+```
 
-**Authentication**: Required
-
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
-  "message": "Project permanently deleted",
-  "data": null
+  "message": "Projects reordered successfully",
+  "data": [
+    {
+      "_id": "674a1b2c3d4e5f6a7b8c9d10",
+      "title": "Portfolio Website",
+      "order": 1
+    }
+  ]
 }
+```
+
+### **Trash Management**
+
+#### **Get Trash**
+
+```
+GET /api/projects/trash
+Authorization: Bearer <admin_token>
+```
+
+#### **Restore Project**
+
+```
+PATCH /api/projects/:id/restore
+Authorization: Bearer <admin_token>
+```
+
+#### **Force Delete Project**
+
+```
+DELETE /api/projects/:id/force
+Authorization: Bearer <admin_token>
 ```
 
 ---
 
-## 3. Experiences (`/api/experiences`)
+## 💻 Experiences
 
-### 3.1 Get All Experiences
+### **Get All Experiences**
 
-**GET** `/api/experiences`
+```
+GET /api/experiences
+```
 
-Get all active experiences.
-
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
@@ -447,118 +566,421 @@ Get all active experiences.
   "message": "Experiences retrieved successfully",
   "data": [
     {
-      "_id": "507f1f77bcf86cd799439011",
-      "company": "Tech Corp",
-      "position": "Senior Developer",
-      "startDate": "2020-01-01T00:00:00.000Z",
-      "endDate": "2023-12-31T00:00:00.000Z",
-      "current": false,
-      "description": "Led development team...",
-      "achievements": ["Increased performance by 50%"],
-      "techStack": ["React", "Node.js"],
-      "companyLogo": "https://ik.imagekit.io/...",
-      "order": 1
+      "_id": "674a1b2c3d4e5f6a7b8c9d20",
+      "title": "Senior Frontend Developer",
+      "company": "Tech Company Inc.",
+      "location": "Jakarta, Indonesia",
+      "startDate": "2023-01-01T00:00:00.000Z",
+      "endDate": null,
+      "current": true,
+      "description": "Leading frontend development team, architecting scalable React applications.",
+      "logo": "https://ik.imagekit.io/portfolio/company-logo.png",
+      "logoFileId": "6748abc123def789",
+      "order": 1,
+      "deletedAt": null,
+      "createdAt": "2024-12-01T10:00:00.000Z",
+      "updatedAt": "2024-12-01T10:00:00.000Z"
     }
+  ]
+}
+```
+
+### **Create Experience**
+
+```
+POST /api/experiences
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "title": "Senior Frontend Developer",
+  "company": "Tech Company Inc.",
+  "location": "Jakarta, Indonesia",
+  "startDate": "2023-01-01",
+  "endDate": null,
+  "current": true,
+  "description": "Leading frontend development team, architecting scalable React applications.",
+  "logo": "https://ik.imagekit.io/portfolio/company-logo.png",
+  "logoFileId": "6748abc123def789",
+  "order": 1
+}
+```
+
+**Validation Rules**:
+
+- `title`: Required string (min 1 character)
+- `company`: Required string (min 1 character)
+- `location`: Optional string
+- `startDate`: Required string (ISO date format)
+- `endDate`: Optional string (ISO date format)
+- `current`: Optional boolean (default: false)
+- `description`: Optional string
+- `logo`: Optional string (valid URL)
+- `logoFileId`: Optional string
+- `order`: Optional number (default: 0)
+
+### **Update Experience**
+
+```
+PUT /api/experiences/:id
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+### **Delete Experience (Soft Delete)**
+
+```
+DELETE /api/experiences/:id
+Authorization: Bearer <admin_token>
+```
+
+### **Reorder Experiences** 🆕
+
+```
+PATCH /api/experiences/reorder
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "orders": [
+    { "id": "674a1b2c3d4e5f6a7b8c9d20", "order": 1 },
+    { "id": "674a1b2c3d4e5f6a7b8c9d21", "order": 2 }
   ]
 }
 ```
 
 ---
 
-### 3.2 Get Single Experience
+## 🎓 Education
 
-**GET** `/api/experiences/:id`
+### **Get All Educations**
 
-Get experience by ID.
+```
+GET /api/educations
+```
 
----
-
-### 3.3 Create Experience
-
-**POST** `/api/experiences`
-
-Create new experience.
-
-**Authentication**: Required
-
-**Request Body:**
+**Response Success (200)**:
 
 ```json
 {
-  "company": "Tech Corp",
-  "position": "Senior Developer",
-  "startDate": "2020-01-01",
-  "endDate": "2023-12-31",
-  "current": false,
-  "description": "Led development team...",
-  "achievements": ["Increased performance by 50%"],
-  "techStack": ["React", "Node.js"],
-  "companyLogo": "https://ik.imagekit.io/...",
+  "statusCode": 200,
+  "message": "Educations retrieved successfully",
+  "data": [
+    {
+      "_id": "674a1b2c3d4e5f6a7b8c9d30",
+      "institution": "Telkom University Purwokerto",
+      "degree": "S1 Software Engineering",
+      "location": "Jawa Tengah, Banyumas, Indonesia",
+      "startDate": "2021-09-01T00:00:00.000Z",
+      "endDate": null,
+      "current": true,
+      "description": "Focus on software architecture, distributed systems, and modern web development.",
+      "type": "formal",
+      "logo": "https://ik.imagekit.io/portfolio/telkom-logo.png",
+      "attachments": [
+        {
+          "title": "Certificate of Graduation",
+          "url": "https://ik.imagekit.io/portfolio/certificate.jpg",
+          "fileId": "6748abc123def456"
+        },
+        {
+          "title": "Academic Transcript (GPA 3.85)",
+          "url": "https://ik.imagekit.io/portfolio/transcript.jpg",
+          "fileId": "6748abc123def457"
+        }
+      ],
+      "order": 1,
+      "isDeleted": false,
+      "createdAt": "2024-12-01T10:00:00.000Z",
+      "updatedAt": "2024-12-01T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+### **Create Education**
+
+```
+POST /api/educations
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "institution": "Telkom University Purwokerto",
+  "degree": "S1 Software Engineering",
+  "location": "Jawa Tengah, Banyumas, Indonesia",
+  "startDate": "2021-09-01",
+  "endDate": null,
+  "current": true,
+  "description": "Focus on software architecture, distributed systems, and modern web development.",
+  "type": "formal",
+  "logo": "https://ik.imagekit.io/portfolio/telkom-logo.png",
+  "attachments": [
+    {
+      "title": "Certificate of Graduation",
+      "url": "https://ik.imagekit.io/portfolio/certificate.jpg",
+      "fileId": "6748abc123def456"
+    },
+    {
+      "title": "Academic Transcript (GPA 3.85)",
+      "url": "https://ik.imagekit.io/portfolio/transcript.jpg",
+      "fileId": "6748abc123def457"
+    }
+  ],
   "order": 1
+}
+```
+
+**Validation Rules**:
+
+- `institution`: Required string (min 1 character)
+- `degree`: Required string (min 1 character)
+- `location`: Optional string
+- `startDate`: Required string (ISO date format)
+- `endDate`: Optional string (ISO date format)
+- `current`: Optional boolean (default: false)
+- `description`: Optional string
+- `type`: Optional enum (`formal`, `bootcamp`, `certification`, `course`) - default: `formal`
+- `logo`: Optional string (valid URL)
+- `attachments`: Optional array of objects with `title`, `url`, `fileId`
+- `order`: Optional number (default: 0)
+
+### **Update Education**
+
+```
+PUT /api/educations/:id
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+### **Delete Education (Soft Delete)**
+
+```
+DELETE /api/educations/:id
+Authorization: Bearer <admin_token>
+```
+
+### **Reorder Educations** 🆕
+
+```
+PATCH /api/educations/reorder
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "orders": [
+    { "id": "674a1b2c3d4e5f6a7b8c9d30", "order": 1 },
+    { "id": "674a1b2c3d4e5f6a7b8c9d31", "order": 2 }
+  ]
 }
 ```
 
 ---
 
-### 3.4 Update Experience
+## 🛠️ Tech Stack
 
-**PUT** `/api/experiences/:id`
+### **Get All Tech Stacks**
 
-Update experience.
+```
+GET /api/techstacks
+GET /api/techstacks?category=frontend
+```
 
-**Authentication**: Required
+**Query Parameters**:
+
+- `category`: Optional filter by category (returns tech stacks that include this category)
+  - Valid values: `languages`, `frontend`, `backend`, `mobile`, `database`, `devops_cloud`, `tools`
+
+**Response Success (200)**:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Tech stacks retrieved",
+  "data": [
+    {
+      "_id": "674a1b2c3d4e5f6a7b8c9d40",
+      "title": "Next.js",
+      "icon": "https://ik.imagekit.io/portfolio/nextjs-icon.svg",
+      "iconFileId": "6748abc123def456",
+      "categories": ["frontend", "backend"],
+      "proficiencyLevel": 4,
+      "order": 1,
+      "deletedAt": null,
+      "createdAt": "2024-12-01T10:00:00.000Z",
+      "updatedAt": "2024-12-01T10:00:00.000Z"
+    },
+    {
+      "_id": "674a1b2c3d4e5f6a7b8c9d41",
+      "title": "TypeScript",
+      "icon": "https://ik.imagekit.io/portfolio/typescript-icon.svg",
+      "iconFileId": "6748abc123def457",
+      "categories": ["languages"],
+      "proficiencyLevel": 5,
+      "order": 2,
+      "deletedAt": null,
+      "createdAt": "2024-12-01T10:00:00.000Z",
+      "updatedAt": "2024-12-01T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+### **Create Tech Stack**
+
+```
+POST /api/techstacks
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "title": "Next.js",
+  "icon": "https://ik.imagekit.io/portfolio/nextjs-icon.svg",
+  "iconFileId": "6748abc123def456",
+  "categories": ["frontend", "backend"],
+  "proficiencyLevel": 4,
+  "order": 1
+}
+```
+
+**Validation Rules**:
+
+- `title`: Required string (min 1 character)
+- `icon`: Optional string (valid URL)
+- `iconFileId`: Optional string
+- `categories`: Required array (min 1 item), each item must be valid category enum
+- `proficiencyLevel`: Optional number (1-5)
+- `order`: Optional number (default: 0)
+
+**Available Categories**:
+
+1. **languages** - Programming languages (JavaScript, TypeScript, Python, etc.)
+2. **frontend** - Frontend frameworks/libraries (React, Vue, Angular, etc.)
+3. **backend** - Backend frameworks (Express, NestJS, Django, etc.)
+4. **mobile** - Mobile development (React Native, Flutter, Swift, etc.)
+5. **database** - Databases (PostgreSQL, MongoDB, Redis, etc.)
+6. **devops_cloud** - DevOps & Cloud (Docker, AWS, Kubernetes, etc.)
+7. **tools** - Development tools (Git, VSCode, Postman, etc.)
+
+### **Update Tech Stack** 🔄 (with Cascade Update)
+
+```
+PUT /api/techstacks/:id
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body** (all fields optional):
+
+```json
+{
+  "title": "React.js",
+  "icon": "https://ik.imagekit.io/portfolio/react-new-icon.svg",
+  "categories": ["frontend"],
+  "proficiencyLevel": 5
+}
+```
+
+**⚠️ Important**: When `title` or `icon` is updated, it automatically cascades to all projects using this tech stack (both string and object formats).
+
+**Response Success (200)**:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Tech stack updated",
+  "data": {
+    "_id": "674a1b2c3d4e5f6a7b8c9d40",
+    "title": "React.js",
+    "icon": "https://ik.imagekit.io/portfolio/react-new-icon.svg",
+    "categories": ["frontend"],
+    "proficiencyLevel": 5,
+    "order": 1,
+    "updatedAt": "2024-12-01T15:00:00.000Z"
+  }
+}
+```
+
+### **Delete Tech Stack (Soft Delete)**
+
+```
+DELETE /api/techstacks/:id
+Authorization: Bearer <admin_token>
+```
+
+### **Reorder Tech Stacks** 🆕
+
+```
+PATCH /api/techstacks/reorder
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Request Body**:
+
+```json
+{
+  "orders": [
+    { "id": "674a1b2c3d4e5f6a7b8c9d40", "order": 1 },
+    { "id": "674a1b2c3d4e5f6a7b8c9d41", "order": 2 }
+  ]
+}
+```
+
+### **Multi-Category Support**
+
+Tech stacks can now belong to multiple categories. Example use cases:
+
+```json
+{
+  "title": "Next.js",
+  "categories": ["frontend", "backend"]  // SSR capabilities
+}
+
+{
+  "title": "TypeScript",
+  "categories": ["languages", "frontend", "backend"]  // Used everywhere
+}
+
+{
+  "title": "GraphQL",
+  "categories": ["backend", "frontend"]  // API + Client
+}
+```
+
+When querying `GET /api/techstacks?category=frontend`, all tech stacks containing "frontend" in their categories array will be returned.
 
 ---
 
-### 3.5 Delete Experience
+## 🚀 Services
 
-**DELETE** `/api/experiences/:id`
+### **Get All Services**
 
-Soft delete experience.
+```
+GET /api/services
+```
 
-**Authentication**: Required
-
----
-
-### 3.6 Get Trash
-
-**GET** `/api/experiences/trash`
-
-Get deleted experiences.
-
-**Authentication**: Required
-
----
-
-### 3.7 Restore Experience
-
-**PATCH** `/api/experiences/:id/restore`
-
-Restore deleted experience.
-
-**Authentication**: Required
-
----
-
-### 3.8 Force Delete Experience
-
-**DELETE** `/api/experiences/:id/force`
-
-Permanently delete experience.
-
-**Authentication**: Required
-
----
-
-## 4. Services (`/api/services`)
-
-### 4.1 Get All Services
-
-**GET** `/api/services`
-
-Get all active services.
-
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
@@ -566,725 +988,678 @@ Get all active services.
   "message": "Services retrieved successfully",
   "data": [
     {
-      "_id": "507f1f77bcf86cd799439011",
-      "title": "Web Development",
-      "description": "Custom web application development",
-      "icon": "https://ik.imagekit.io/...",
-      "features": ["Responsive Design", "SEO Optimized"],
-      "order": 1
+      "_id": "674a1b2c3d4e5f6a7b8c9d50",
+      "title": "Full-Stack Web Development",
+      "description": "Custom web applications built with modern technologies like React, Next.js, Node.js, and MongoDB.",
+      "icon": "https://ik.imagekit.io/portfolio/web-dev-icon.svg",
+      "iconFileId": "6748abc123def456",
+      "features": [
+        "Responsive Design",
+        "SEO Optimization",
+        "Performance Optimization",
+        "API Integration"
+      ],
+      "price": "Starting from $500",
+      "duration": "2-4 weeks",
+      "order": 1,
+      "isActive": true,
+      "deletedAt": null,
+      "createdAt": "2024-12-01T10:00:00.000Z",
+      "updatedAt": "2024-12-01T10:00:00.000Z"
     }
   ]
 }
 ```
 
----
+### **Create Service**
 
-### 4.2 Create Service
+```
+POST /api/services
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
 
-**POST** `/api/services`
-
-Create new service.
-
-**Authentication**: Required
-
-**Request Body:**
+**Request Body**:
 
 ```json
 {
-  "title": "Web Development",
-  "description": "Custom web application development",
-  "icon": "https://ik.imagekit.io/...",
-  "features": ["Responsive Design", "SEO Optimized"],
-  "order": 1
+  "title": "Full-Stack Web Development",
+  "description": "Custom web applications built with modern technologies...",
+  "icon": "https://ik.imagekit.io/portfolio/web-dev-icon.svg",
+  "iconFileId": "6748abc123def456",
+  "features": [
+    "Responsive Design",
+    "SEO Optimization",
+    "Performance Optimization",
+    "API Integration"
+  ],
+  "price": "Starting from $500",
+  "duration": "2-4 weeks",
+  "order": 1,
+  "isActive": true
 }
+```
+
+**Validation Rules**:
+
+- `title`: Required string (min 1 character)
+- `description`: Required string (min 10 characters)
+- `icon`: Optional string (valid URL)
+- `iconFileId`: Optional string
+- `features`: Optional array of strings
+- `price`: Optional string
+- `duration`: Optional string
+- `order`: Optional number (default: 0)
+- `isActive`: Optional boolean (default: true)
+
+### **Update Service**
+
+```
+PUT /api/services/:id
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+### **Delete Service (Soft Delete)**
+
+```
+DELETE /api/services/:id
+Authorization: Bearer <admin_token>
 ```
 
 ---
 
-### 4.3-4.8 Other Service Endpoints
+## 📞 Contact
 
-Same CRUD + soft delete pattern as Projects.
+### **Submit Contact Form**
 
----
-
-## 5. Tech Stack (`/api/techstacks`)
-
-### 5.1 Get All Tech Stacks
-
-**GET** `/api/techstacks`
-
-Get all active tech stacks.
-
-**Response (200):**
-
-```json
-{
-  "statusCode": 200,
-  "message": "Tech stacks retrieved successfully",
-  "data": [
-    {
-      "_id": "507f1f77bcf86cd799439011",
-      "name": "React",
-      "category": "Frontend",
-      "proficiency": 90,
-      "logoUrl": "https://ik.imagekit.io/...",
-      "order": 1
-    }
-  ]
-}
+```
+POST /api/contact
+Content-Type: application/json
 ```
 
----
-
-### 5.2 Create Tech Stack
-
-**POST** `/api/techstacks`
-
-Create new tech stack.
-
-**Authentication**: Required
-
-**Request Body:**
+**Request Body**:
 
 ```json
 {
-  "name": "React",
-  "category": "Frontend",
-  "proficiency": 90,
-  "logoUrl": "https://ik.imagekit.io/...",
-  "order": 1
-}
-```
-
----
-
-### 5.3-5.8 Other Tech Stack Endpoints
-
-Same CRUD + soft delete pattern as Projects.
-
----
-
-## 6. About (`/api/about`)
-
-> **Note**: About is a singleton resource (only one document exists). The PUT endpoint uses **upsert pattern** - it creates if not exists, updates if exists.
-
-### 6.1 Get About
-
-**GET** `/api/about`
-
-Get about information (single document).
-
-**Response (200) - When data exists:**
-
-```json
-{
-  "statusCode": 200,
-  "message": "About retrieved",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "bio": "Full Stack Developer with 3+ years of experience...",
-    "profileImage": "https://ik.imagekit.io/1yelpitcv/irpanzy/profile.jpg",
-    "profileImageFileId": "file_abc123",
-    "heroTitle": "Hi, I'm Irfan Muria",
-    "heroSubtitle": "Full Stack Developer & Software Engineering Student",
-    "heroDescription": "Building scalable web applications with modern technologies",
-    "resumeLink": "https://drive.google.com/file/d/1234567890/view",
-    "infoList": [
-      {
-        "icon": "🎓",
-        "iconDark": "🎓",
-        "title": "Education",
-        "description": "Telkom University Purwokerto - Software Engineering"
-      },
-      {
-        "icon": "💼",
-        "iconDark": "💼",
-        "title": "Experience",
-        "description": "3+ Years in Web Development"
-      }
-    ],
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-15T00:00:00.000Z"
-  }
-}
-```
-
-**Response (200) - When no data exists:**
-
-```json
-{
-  "statusCode": 200,
-  "message": "No about data yet",
-  "data": null
-}
-```
-
-> Frontend should check if `data === null` to determine if About data needs to be created.
-
----
-
-### 6.2 Create or Update About (Upsert)
-
-**PUT** `/api/about`
-
-Create new about data (first time) or update existing data.
-
-**Authentication**: Required
-
-**Request Body:** (all fields required)
-
-```json
-{
-  "bio": "Full Stack Developer with 3+ years of experience building web applications. Passionate about clean code and user experience.",
-  "profileImage": "https://ik.imagekit.io/1yelpitcv/irpanzy/profile.jpg",
-  "profileImageFileId": "file_abc123",
-  "heroTitle": "Hi, I'm Irfan Muria",
-  "heroSubtitle": "Full Stack Developer & Software Engineering Student",
-  "heroDescription": "Building scalable web applications with modern technologies",
-  "resumeLink": "https://drive.google.com/file/d/1234567890/view",
-  "infoList": [
-    {
-      "icon": "🎓",
-      "iconDark": "🎓",
-      "title": "Education",
-      "description": "Telkom University Purwokerto - Software Engineering"
-    },
-    {
-      "icon": "💼",
-      "iconDark": "💼",
-      "title": "Experience",
-      "description": "3+ Years in Web Development"
-    },
-    {
-      "icon": "🌍",
-      "iconDark": "🌍",
-      "title": "Languages",
-      "description": "Indonesian, English"
-    }
-  ]
-}
-```
-
-**Validation Rules:**
-
-- `bio`: String, required, min 10 characters
-- `profileImage`: String, required, valid URL
-- `profileImageFileId`: String, required (from ImageKit upload)
-- `heroTitle`: String, required, min 3 characters
-- `heroSubtitle`: String, required, min 3 characters
-- `heroDescription`: String, required, min 10 characters
-- `resumeLink`: String, required, valid URL
-- `infoList`: Array, required, min 1 item, each item must have:
-  - `icon`: String, required
-  - `iconDark`: String, required
-  - `title`: String, required
-  - `description`: String, required
-
-**Response (201) - First time creation:**
-
-```json
-{
-  "statusCode": 201,
-  "message": "About data created successfully",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "bio": "Full Stack Developer...",
-    "profileImage": "https://ik.imagekit.io/...",
-    "heroTitle": "Hi, I'm Irfan Muria",
-    ...
-  }
-}
-```
-
-**Response (200) - Update existing:**
-
-```json
-{
-  "statusCode": 200,
-  "message": "About data updated successfully",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "bio": "Updated bio...",
-    "profileImage": "https://ik.imagekit.io/...",
-    ...
-  }
-}
-```
-
-**Errors:**
-
-- `400`: Validation failed (missing or invalid fields)
-- `401`: Unauthorized (missing or invalid token)
-
-**Example Workflow:**
-
-1. **Check if data exists**: `GET /api/about`
-2. **Upload profile image**: `POST /api/upload/single` with `category=ABOUT`
-3. **Create/Update about**: `PUT /api/about` with form data including image URL and fileId from step 2
-
----
-
-## 7. Contact (`/api/contact`)
-
-### 7.1 Create Contact
-
-**POST** `/api/contact`
-
-Submit contact form (public endpoint).
-
-**Rate Limit**: 3 req/15min
-
-**Request Body:**
-
-```json
-{
-  "name": "Jane Smith",
-  "email": "jane@example.com",
+  "name": "John Doe",
+  "email": "john@example.com",
   "subject": "Project Inquiry",
-  "message": "I would like to discuss a project..."
+  "message": "Hi, I'm interested in your web development services. Could we discuss my project requirements?"
 }
 ```
 
-**Response (201):**
+**Validation Rules**:
+
+- `name`: Required string (min 2, max 100 characters)
+- `email`: Required string (valid email format)
+- `subject`: Optional string (max 200 characters)
+- `message`: Required string (min 10, max 1000 characters)
+
+**Response Success (201)**:
 
 ```json
 {
   "statusCode": 201,
   "message": "Contact message sent successfully",
   "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "name": "Jane Smith",
-    "email": "jane@example.com",
+    "_id": "674a1b2c3d4e5f6a7b8c9d60",
+    "name": "John Doe",
+    "email": "john@example.com",
     "subject": "Project Inquiry",
-    "message": "I would like to discuss a project...",
-    "isRead": false,
-    "createdAt": "2024-01-01T00:00:00.000Z"
+    "message": "Hi, I'm interested in your web development services...",
+    "status": "unread",
+    "createdAt": "2024-12-01T15:30:00.000Z"
   }
 }
 ```
 
----
+### **Get All Contact Messages** (Admin Only)
 
-### 7.2 Get All Contacts
+```
+GET /api/contact
+Authorization: Bearer <admin_token>
+```
 
-**GET** `/api/contact`
+**Query Parameters**:
 
-Get all contact messages (admin only).
+- `status`: Filter by status (`unread`, `read`, `replied`)
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 10)
 
-**Authentication**: Required
-
-**Query Parameters:**
-
-- `page` (optional): Page number
-- `limit` (optional): Items per page
-- `isRead` (optional): Filter by read status (true/false)
-
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
-  "message": "Contacts retrieved successfully",
-  "data": {
-    "contacts": [
-      {
-        "_id": "507f1f77bcf86cd799439011",
-        "name": "Jane Smith",
-        "email": "jane@example.com",
-        "subject": "Project Inquiry",
-        "message": "I would like to discuss...",
-        "isRead": false,
-        "createdAt": "2024-01-01T00:00:00.000Z"
-      }
-    ],
-    "pagination": {
-      "total": 5,
-      "page": 1,
-      "pages": 1
+  "message": "Contact messages retrieved successfully",
+  "data": [
+    {
+      "_id": "674a1b2c3d4e5f6a7b8c9d60",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "subject": "Project Inquiry",
+      "message": "Hi, I'm interested in your web development services...",
+      "status": "unread",
+      "createdAt": "2024-12-01T15:30:00.000Z",
+      "updatedAt": "2024-12-01T15:30:00.000Z"
     }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 5,
+    "totalItems": 47,
+    "itemsPerPage": 10
   }
 }
 ```
 
----
+### **Update Contact Status**
 
-### 7.3 Get Single Contact
+```
+PATCH /api/contact/:id/status
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
 
-**GET** `/api/contact/:id`
-
-Get contact message by ID.
-
-**Authentication**: Required
-
----
-
-### 7.4 Mark as Read
-
-**PATCH** `/api/contact/:id/read`
-
-Mark contact message as read.
-
-**Authentication**: Required
-
-**Response (200):**
+**Request Body**:
 
 ```json
 {
-  "statusCode": 200,
-  "message": "Contact marked as read",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "isRead": true
-  }
+  "status": "read"
 }
+```
+
+### **Delete Contact Message**
+
+```
+DELETE /api/contact/:id
+Authorization: Bearer <admin_token>
 ```
 
 ---
 
-### 7.5 Delete Contact
+## 🤖 AI Chat
 
-**DELETE** `/api/contact/:id`
+### **Send Chat Message**
 
-Delete contact message (permanent).
-
-**Authentication**: Required
-
-**Response (200):**
-
-```json
-{
-  "statusCode": 200,
-  "message": "Contact deleted successfully",
-  "data": null
-}
+```
+POST /api/chat
+Content-Type: application/json
 ```
 
----
-
-## 8. Chat (`/api/chat`)
-
-### 8.1 Chat with AI
-
-**POST** `/api/chat`
-
-Send message to AI chatbot with portfolio context.
-
-**Rate Limit**: 10 req/15min
-
-**Request Body:**
+**Request Body**:
 
 ```json
 {
-  "message": "What technologies do you use?",
+  "message": "What programming languages do you work with?",
   "sessionId": "optional-session-id"
 }
 ```
 
-**Response (200):**
+**Validation Rules**:
+
+- `message`: Required string (min 1, max 1000 characters)
+- `sessionId`: Optional string (for conversation continuity)
+
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
   "message": "Chat response generated",
   "data": {
-    "response": "I specialize in React, Node.js, and MongoDB...",
-    "sessionId": "507f1f77bcf86cd799439011",
-    "timestamp": "2024-01-01T00:00:00.000Z"
+    "response": "I primarily work with JavaScript/TypeScript for both frontend and backend development. For frontend, I use React, Next.js, and Vue.js. On the backend, I work with Node.js, Express.js, and NestJS. I also have experience with Python for data processing and automation tasks.",
+    "sessionId": "674a1b2c-3d4e-5f6a-7b8c-9d0e1f2a3b4c",
+    "timestamp": "2024-12-01T15:30:00.000Z"
   }
 }
 ```
 
----
+**Response Error (429) - Rate Limit**:
 
-### 8.2 Get Chat History
+```json
+{
+  "statusCode": 429,
+  "message": "Too many requests. Please wait before sending another message.",
+  "success": false
+}
+```
 
-**GET** `/api/chat/history/:sessionId`
+### **Get Chat History** (Admin Only)
 
-Get chat history for a session.
+```
+GET /api/chat/history
+Authorization: Bearer <admin_token>
+```
 
-**Authentication**: Required
+**Query Parameters**:
 
-**Response (200):**
+- `sessionId`: Filter by specific session
+- `page`: Page number (default: 1)
+- `limit`: Items per page (default: 20)
+
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
-  "message": "Chat history retrieved",
-  "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "sessionId": "abc123",
-    "messages": [
-      {
-        "role": "user",
-        "content": "What technologies do you use?",
-        "timestamp": "2024-01-01T00:00:00.000Z"
-      },
-      {
-        "role": "assistant",
-        "content": "I specialize in React...",
-        "timestamp": "2024-01-01T00:00:01.000Z"
-      }
-    ]
-  }
+  "message": "Chat history retrieved successfully",
+  "data": [
+    {
+      "_id": "674a1b2c3d4e5f6a7b8c9d70",
+      "sessionId": "674a1b2c-3d4e-5f6a-7b8c-9d0e1f2a3b4c",
+      "userMessage": "What programming languages do you work with?",
+      "aiResponse": "I primarily work with JavaScript/TypeScript...",
+      "ipAddress": "192.168.1.100",
+      "userAgent": "Mozilla/5.0...",
+      "createdAt": "2024-12-01T15:30:00.000Z"
+    }
+  ]
 }
 ```
 
+### **Chat Features**
+
+- **Session Management**: Maintains conversation context using sessionId
+- **Rate Limiting**: 10 messages per 15 minutes per IP
+- **Content Filtering**: Filters inappropriate content
+- **Context Awareness**: AI has knowledge about the portfolio owner's skills and experience
+- **History Tracking**: All conversations are logged for admin review
+
 ---
 
-### 8.3 Delete Chat History
+## 📁 File Upload (ImageKit Integration)
 
-**DELETE** `/api/chat/history/:sessionId`
+### **Upload Image/File**
 
-Delete chat session history.
-
-**Authentication**: Required
-
-**Response (200):**
-
-```json
-{
-  "statusCode": 200,
-  "message": "Chat history deleted successfully",
-  "data": null
-}
+```
+POST /api/upload
+Authorization: Bearer <admin_token>
+Content-Type: multipart/form-data
 ```
 
----
-
-## 9. Upload (`/api/upload`)
-
-### 9.1 Upload Single File
-
-**POST** `/api/upload/single`
-
-Upload single file to ImageKit.
-
-**Authentication**: Required
-
-**Content-Type**: `multipart/form-data`
-
-**Form Data:**
+**Request Body (Form Data)**:
 
 - `file`: File to upload (required)
-- `category`: Folder category (optional)
-  - Values: `PROJECTS`, `EXPERIENCES`, `SERVICES`, `TECHSTACKS`, `ABOUT`
-  - Default: `GENERAL`
+- `folder`: Target folder in ImageKit (optional, default: "portfolio")
 
-**Response (201):**
-
-```json
-{
-  "statusCode": 201,
-  "message": "File uploaded successfully",
-  "data": {
-    "url": "https://ik.imagekit.io/...",
-    "fileId": "abc123",
-    "name": "image.jpg",
-    "size": 102400,
-    "folder": "/portfolio/projects"
-  }
-}
-```
-
-**Example cURL:**
+**cURL Example**:
 
 ```bash
-curl -X POST http://localhost:8000/api/upload/single \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -F "file=@image.jpg" \
-  -F "category=PROJECTS"
+curl -X POST \
+  -H "Authorization: Bearer your_token" \
+  -F "file=@/path/to/image.jpg" \
+  -F "folder=projects" \
+  https://your-domain.com/api/upload
 ```
 
----
-
-### 9.2 Upload Multiple Files
-
-**POST** `/api/upload/multiple`
-
-Upload multiple files (max 10).
-
-**Authentication**: Required
-
-**Content-Type**: `multipart/form-data`
-
-**Form Data:**
-
-- `files`: Files to upload (required, max 10)
-- `category`: Folder category (optional)
-
-**Response (201):**
+**Response Success (200)**:
 
 ```json
 {
-  "statusCode": 201,
-  "message": "Files uploaded successfully",
+  "statusCode": 200,
+  "message": "File uploaded successfully",
   "data": {
-    "results": [
-      {
-        "url": "https://ik.imagekit.io/...",
-        "fileId": "abc123",
-        "name": "image1.jpg",
-        "size": 102400
-      },
-      {
-        "url": "https://ik.imagekit.io/...",
-        "fileId": "def456",
-        "name": "image2.jpg",
-        "size": 204800
-      }
-    ],
-    "folder": "/portfolio/projects"
+    "fileId": "6748abc123def456",
+    "name": "image.jpg",
+    "url": "https://ik.imagekit.io/portfolio/projects/image.jpg",
+    "thumbnailUrl": "https://ik.imagekit.io/portfolio/projects/tr:w-300,h-300/image.jpg",
+    "filePath": "/projects/image.jpg",
+    "size": 245760,
+    "fileType": "image",
+    "mime": "image/jpeg"
   }
 }
 ```
 
----
+**Supported File Types**:
 
-### 9.3 Delete File
+- **Images**: JPG, JPEG, PNG, GIF, WebP, SVG
+- **Documents**: PDF, DOC, DOCX, TXT
+- **Maximum Size**: 10MB per file
 
-**DELETE** `/api/upload/:fileId`
+### **Delete File**
 
-Delete file from ImageKit.
+```
+DELETE /api/upload/:fileId
+Authorization: Bearer <admin_token>
+```
 
-**Authentication**: Required
-
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
   "message": "File deleted successfully",
   "data": {
-    "fileId": "abc123"
+    "fileId": "6748abc123def456",
+    "deleted": true
   }
 }
 ```
 
----
+### **Get File Details**
 
-### 9.4 Get Optimized URL
+```
+GET /api/upload/:fileId
+Authorization: Bearer <admin_token>
+```
 
-**GET** `/api/upload/optimize/:fileId`
-
-Get optimized image URL with transformations.
-
-**Authentication**: Required
-
-**Query Parameters:**
-
-- `width`: Image width
-- `height`: Image height
-- `quality`: Image quality (1-100)
-- `format`: Output format (webp, avif, jpg, png)
-
-**Response (200):**
+**Response Success (200)**:
 
 ```json
 {
   "statusCode": 200,
-  "message": "Optimized URL generated",
+  "message": "File details retrieved successfully",
   "data": {
-    "url": "https://ik.imagekit.io/.../tr:w-800,h-600,q-80,f-webp"
+    "fileId": "6748abc123def456",
+    "name": "image.jpg",
+    "url": "https://ik.imagekit.io/portfolio/projects/image.jpg",
+    "filePath": "/projects/image.jpg",
+    "size": 245760,
+    "fileType": "image",
+    "mime": "image/jpeg",
+    "createdAt": "2024-12-01T10:00:00.000Z"
   }
 }
 ```
 
+### **Image Transformations**
+
+ImageKit provides real-time image transformations via URL parameters:
+
+```
+# Resize to 300x300
+https://ik.imagekit.io/portfolio/image.jpg?tr=w-300,h-300
+
+# Create thumbnail with quality optimization
+https://ik.imagekit.io/portfolio/image.jpg?tr=w-150,h-150,q-80
+
+# Convert format and compress
+https://ik.imagekit.io/portfolio/image.jpg?tr=f-webp,q-70
+```
+
 ---
 
-### 9.5 Initialize Folders
+## 🧪 Testing Examples
 
-**POST** `/api/upload/initialize-folders`
+### **Authentication Flow**
 
-Create all portfolio folders in ImageKit.
+1. **Login**:
 
-**Authentication**: Required
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@example.com",
+    "password": "your-password"
+  }'
+```
 
-**Response (200):**
+2. **Use Token**:
 
-```json
-{
-  "statusCode": 200,
-  "message": "Portfolio folder structure initialized successfully",
-  "data": {
-    "folders": [
-      "/portfolio/projects",
-      "/portfolio/experiences",
-      "/portfolio/services",
-      "/portfolio/techstacks",
-      "/portfolio/about",
-      "/portfolio"
+```bash
+# Save token from login response
+TOKEN="eyJhbGciOiJIUzI1NiIs..."
+
+# Use in subsequent requests
+curl -X GET http://localhost:3000/api/projects \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### **CRUD Operations Example (Projects)**
+
+```bash
+# 1. Create Project
+curl -X POST http://localhost:3000/api/projects \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "E-Commerce Platform",
+    "description": "Full-stack e-commerce built with Next.js and Node.js",
+    "bgImage": "https://ik.imagekit.io/portfolio/ecommerce.jpg",
+    "demoLink": "https://ecommerce-demo.vercel.app",
+    "githubLink": "https://github.com/user/ecommerce",
+    "techStack": ["Next.js", "Node.js", "MongoDB", "Stripe"],
+    "order": 1,
+    "isVisible": true
+  }'
+
+# 2. Get All Projects
+curl -X GET http://localhost:3000/api/projects
+
+# 3. Update Project
+curl -X PUT http://localhost:3000/api/projects/674a1b2c3d4e5f6a7b8c9d10 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "E-Commerce Platform v2",
+    "description": "Updated description with new features"
+  }'
+
+# 4. Reorder Projects
+curl -X PATCH http://localhost:3000/api/projects/reorder \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orders": [
+      { "id": "674a1b2c3d4e5f6a7b8c9d10", "order": 2 },
+      { "id": "674a1b2c3d4e5f6a7b8c9d11", "order": 1 }
     ]
+  }'
+
+# 5. Delete Project (Soft Delete)
+curl -X DELETE http://localhost:3000/api/projects/674a1b2c3d4e5f6a7b8c9d10 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### **Tech Stack with Multi-Category**
+
+```bash
+# Create tech stack with multiple categories
+curl -X POST http://localhost:3000/api/techstacks \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Next.js",
+    "icon": "https://ik.imagekit.io/portfolio/nextjs.svg",
+    "categories": ["frontend", "backend"],
+    "proficiencyLevel": 4,
+    "order": 1
+  }'
+
+# Filter by category
+curl -X GET "http://localhost:3000/api/techstacks?category=frontend"
+```
+
+### **Contact Form Submission**
+
+```bash
+# Submit contact form (public endpoint)
+curl -X POST http://localhost:3000/api/contact \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "subject": "Project Inquiry",
+    "message": "Hi, I would like to discuss a web development project with you."
+  }'
+```
+
+### **Chat with AI**
+
+```bash
+# Send message to AI chatbot
+curl -X POST http://localhost:3000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "What technologies do you specialize in?",
+    "sessionId": "optional-session-id"
+  }'
+```
+
+### **File Upload**
+
+```bash
+# Upload image file
+curl -X POST http://localhost:3000/api/upload \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@./project-screenshot.jpg" \
+  -F "folder=projects"
+```
+
+---
+
+## 🚀 Deployment & Environment
+
+### **Environment Variables**
+
+Create `.env` file with the following variables:
+
+```env
+# Database
+DATABASE_URL=mongodb://localhost:27017/portfolio
+# or MongoDB Atlas: mongodb+srv://username:password@cluster.mongodb.net/portfolio
+
+# JWT
+JWT_SECRET=your-super-secret-key-here
+JWT_REFRESH_SECRET=your-refresh-secret-key-here
+JWT_EXPIRES_IN=7d
+JWT_REFRESH_EXPIRES_IN=30d
+
+# ImageKit (File Upload)
+IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
+IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id
+
+# Google Gemini AI (Chat)
+GEMINI_API_KEY=your_gemini_api_key
+
+# Server
+PORT=3000
+NODE_ENV=production
+```
+
+### **Vercel Deployment**
+
+Create `vercel.json`:
+
+```json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "dist/index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
   }
 }
 ```
 
----
+**Deployment Steps**:
 
-## Error Codes
+1. **Build the project**:
 
-| Code | Description                             |
-| ---- | --------------------------------------- |
-| 200  | Success                                 |
-| 201  | Created                                 |
-| 400  | Bad Request - Invalid input             |
-| 401  | Unauthorized - Invalid or missing token |
-| 403  | Forbidden - Insufficient permissions    |
-| 404  | Not Found - Resource doesn't exist      |
-| 409  | Conflict - Duplicate resource           |
-| 429  | Too Many Requests - Rate limit exceeded |
-| 500  | Internal Server Error                   |
+```bash
+npm run build
+```
 
----
+2. **Deploy to Vercel**:
 
-## Validation Errors
+```bash
+npx vercel
+# or
+vercel --prod
+```
 
-When validation fails, the response includes detailed error information:
+3. **Set Environment Variables** in Vercel Dashboard:
+   - Go to Project Settings → Environment Variables
+   - Add all variables from `.env` file
 
-```json
-{
-  "statusCode": 400,
-  "message": "Validation failed",
-  "errors": [
-    {
-      "field": "email",
-      "message": "Invalid email format"
-    },
-    {
-      "field": "password",
-      "message": "Password must be at least 8 characters"
-    }
-  ]
-}
+### **Local Development**
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
 ```
 
 ---
 
-## Notes
+## 📚 API Summary
 
-1. **Pagination**: All list endpoints support pagination with `page` and `limit` query parameters
-2. **Soft Delete**: Projects, Experiences, Services, and Tech Stacks support soft delete (trash/restore)
-3. **File Upload**: Max file size 5MB per file
-4. **Rate Limiting**: Different limits for different endpoint categories
-5. **CORS**: Configured for specific origins (localhost:5173 and production frontend)
-6. **Security**: All inputs are sanitized against NoSQL injection and XSS attacks using custom sanitizers (Express 5 compatible)
+### **Public Endpoints** (No Authentication Required)
+
+- `GET /api/hero` - Get hero/landing page data
+- `GET /api/about` - Get about section data
+- `GET /api/projects` - Get all visible projects
+- `GET /api/projects/:id` - Get single project
+- `GET /api/experiences` - Get all experiences
+- `GET /api/educations` - Get all educations
+- `GET /api/techstacks` - Get all tech stacks
+- `GET /api/services` - Get all active services
+- `POST /api/contact` - Submit contact form
+- `POST /api/chat` - Send message to AI chatbot
+
+### **Admin Endpoints** (Authentication Required)
+
+All CREATE, UPDATE, DELETE operations require JWT authentication:
+
+- **Authentication**: `/api/auth/*`
+- **Hero Management**: `POST/PUT /api/hero`
+- **About Management**: `POST/PUT /api/about`
+- **Project Management**: `POST/PUT/DELETE /api/projects/*`
+- **Experience Management**: `POST/PUT/DELETE /api/experiences/*`
+- **Education Management**: `POST/PUT/DELETE /api/educations/*`
+- **Tech Stack Management**: `POST/PUT/DELETE /api/techstacks/*`
+- **Service Management**: `POST/PUT/DELETE /api/services/*`
+- **Contact Management**: `GET/PATCH/DELETE /api/contact/*`
+- **File Management**: `POST/GET/DELETE /api/upload/*`
+- **Chat History**: `GET /api/chat/history`
+- **Reorder Endpoints**: `PATCH /api/{entity}/reorder`
+
+### **Special Features** 🌟
+
+1. **Multi-Category Tech Stack**: Tech stacks can belong to multiple categories
+2. **Cascade Updates**: Tech stack title/icon changes auto-update all projects
+3. **Soft Delete**: All delete operations are soft deletes with trash management
+4. **Reorder Endpoints**: Drag-and-drop reordering for projects, experiences, etc.
+5. **Education Attachments**: Support for certificates and documents
+6. **Hero/About Separation**: Dedicated hero model for landing page data
+7. **AI Chat Integration**: Smart chatbot with context awareness
+8. **ImageKit Integration**: Advanced file upload with real-time transformations
+9. **Rate Limiting**: Protection against abuse and spam
+10. **Comprehensive Error Handling**: Detailed error messages and validation
 
 ---
 
-## Postman Collection
+## 📞 Support & Contact
 
-Import this base URL as environment variable:
+For technical support or questions about this API:
 
-```
-BASE_URL=http://localhost:8000/api
-```
-
-For production:
-
-```
-BASE_URL=https://your-domain.com/api
-```
+- **Developer**: Irfan Muria
+- **Email**: admin@example.com
+- **Documentation**: [API Contract](./API_CONTRACT.md)
+- **GitHub**: [Repository Link](https://github.com/your-username/portfolio-be)
 
 ---
 
-**Last Updated**: July 26, 2026  
-**API Version**: 1.0.0
+**© 2024 Portfolio API - Built with Express.js & TypeScript**
