@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { TechStack } from "../models";
+﻿import { Request, Response } from "express";
+import { TechStack, Project } from "../models";
 import { asyncHandler, ApiResponse, ApiError } from "../utils";
 
 export const getTechStacks = asyncHandler(
@@ -52,19 +52,36 @@ export const updateTechStack = asyncHandler(
       { new: true, runValidators: true }
     );
 
-    if (req.body.title && req.body.title !== oldTitle) {
-      const { Project } = await import("../models/index.js");
+    const titleChanged = req.body.title && req.body.title !== oldTitle;
+    const iconChanged = req.body.icon !== undefined;
 
-      await Project.updateMany(
-        { techStack: oldTitle, deletedAt: null },
-        { $set: { "techStack.$": req.body.title } }
-      );
+    if (titleChanged || iconChanged) {
+      const targetTitle = req.body.title || oldTitle;
+      const escapedOld = oldTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const titleRegex = new RegExp(`^${escapedOld}$`, "i");
 
-      await Project.updateMany(
-        { "techStack.title": oldTitle, deletedAt: null },
-        { $set: { "techStack.$[elem].title": req.body.title } },
-        { arrayFilters: [{ "elem.title": oldTitle }] }
-      );
+      if (titleChanged) {
+        await Project.updateMany(
+          { techStack: titleRegex, deletedAt: null },
+          { $set: { "techStack.$": targetTitle } }
+        );
+      }
+
+      const setObj: Record<string, any> = {};
+      if (titleChanged) {
+        setObj["techStack.$[elem].title"] = targetTitle;
+      }
+      if (iconChanged) {
+        setObj["techStack.$[elem].icon"] = req.body.icon;
+      }
+
+      if (Object.keys(setObj).length > 0) {
+        await Project.updateMany(
+          { "techStack.title": titleRegex, deletedAt: null },
+          { $set: setObj },
+          { arrayFilters: [{ "elem.title": titleRegex }] }
+        );
+      }
     }
 
     res.json(new ApiResponse(200, "Tech stack updated", techStack));
