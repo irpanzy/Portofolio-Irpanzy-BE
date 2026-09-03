@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const experienceAttachmentSchema = z.object({
+  title: z.string().min(1, "Attachment title is required"),
+  url: z.string().url("Attachment URL must be a valid URL"),
+  fileId: z.string().optional(),
+});
+
 export const createExperienceSchema = z.object({
   company: z.string().min(1, "Company name is required"),
   position: z.string().min(1, "Position is required"),
@@ -12,6 +18,7 @@ export const createExperienceSchema = z.object({
   responsibilities: z
     .array(z.string())
     .min(1, "At least one responsibility is required"),
+  attachments: z.array(experienceAttachmentSchema).optional().default([]),
   order: z.number().int().nonnegative().optional(),
 });
 
@@ -28,5 +35,6 @@ export const updateExperienceSchema = z.object({
     .array(z.string())
     .min(1, "At least one responsibility is required")
     .optional(),
+  attachments: z.array(experienceAttachmentSchema).optional(),
   order: z.number().int().nonnegative().optional(),
 });

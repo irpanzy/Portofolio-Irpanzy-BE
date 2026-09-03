@@ -1,5 +1,11 @@
 import { Document } from "mongoose";
 
+export interface IExperienceAttachment {
+  title: string;
+  url: string;
+  fileId?: string;
+}
+
 export interface IExperience extends Document {
   company: string;
   position: string;
@@ -11,6 +17,7 @@ export interface IExperience extends Document {
   logo: string;
   logoFileId?: string;
   responsibilities: string[];
+  attachments: IExperienceAttachment[];
   order: number;
   deletedAt: Date | null;
   deletedBy: string | null;
@@ -28,6 +35,7 @@ export interface CreateExperienceDTO {
   description: string;
   logo?: string;
   responsibilities: string[];
+  attachments?: IExperienceAttachment[];
   order?: number;
 }
 
@@ -41,5 +49,6 @@ export interface UpdateExperienceDTO {
   description?: string;
   logo?: string;
   responsibilities?: string[];
+  attachments?: IExperienceAttachment[];
   order?: number;
 }

@@ -1,5 +1,14 @@
 import mongoose, { Schema } from "mongoose";
-import { IExperience } from "../types";
+import { IExperience, IExperienceAttachment } from "../types";
+
+const experienceAttachmentSchema = new Schema<IExperienceAttachment>(
+  {
+    title: { type: String, required: true, trim: true },
+    url: { type: String, required: true, trim: true },
+    fileId: { type: String, default: "" },
+  },
+  { _id: false }
+);
 
 const experienceSchema = new Schema<IExperience>(
   {
@@ -13,6 +22,10 @@ const experienceSchema = new Schema<IExperience>(
     logo: { type: String, default: null },
     logoFileId: { type: String, default: null },
     responsibilities: [{ type: String }],
+    attachments: {
+      type: [experienceAttachmentSchema],
+      default: [],
+    },
     order: { type: Number, default: 0 },
     deletedAt: { type: Date, default: null },
     deletedBy: { type: String, default: null },
