@@ -2,6 +2,14 @@
 
 Backend API untuk portfolio Irfan Muria dengan fitur AI Chatbot, Hero/About Management, dan Multi-Category Tech Stack.
 
+## 📚 Quick Links
+
+- 📄 [Upload API Guide](./docs/UPLOAD_API_GUIDE.md) - Complete upload guide (images & PDFs)
+- 🔄 [Attachment Reorder Guide](./docs/ATTACHMENT_REORDER_GUIDE.md) - Reorder attachments easily
+- 📝 [API Contract](./docs/API_CONTRACT.md) - Full API documentation
+- 📋 [Update Summary](./docs/UPDATE_SUMMARY.md) - Latest changes
+- 📜 [Changelog](./docs/CHANGELOG.md) - Version history
+
 ---
 
 ## 🚀 Tech Stack
@@ -166,38 +174,56 @@ docs/
 
 ### ✨ **New Features (Latest Update)**
 
-#### 1. **Hero/About Separation**
+#### 1. **Experience Attachments** 📎 **(v2.3.0 - December 2024)**
+
+- **Same as Education**: Experiences sekarang support attachments (awards, photos, docs)
+- **Structure**: `{ title, url, fileId }` - identik dengan Education
+- **Use Cases**: Employee awards, project photos, certificates, contracts
+- **Optional Field**: Default empty array, fully backward compatible
+- **[📖 Full Guide](./docs/EXPERIENCE_ATTACHMENTS_FEATURE.md)**
+
+#### 2. **PDF Upload Support** 📄 **(v2.2.0 - December 2024)**
+
+- **Unified API**: Single endpoint for images AND documents (`POST /api/upload/single`)
+- **File Types**: JPG, PNG, WebP, SVG, GIF, **PDF**, DOC, DOCX, TXT
+- **Use Case**: Upload certificates, transcripts, documents alongside photos
+- **Enhanced Response**: File type detection, preview URLs, browser viewability
+- **Folders**: EDUCATIONS for certificates, DOCUMENTS for general files
+- **Max Size**: 10MB per file
+- **[📖 Full Guide](./docs/UPLOAD_API_GUIDE.md)**
+
+#### 3. **Hero/About Separation**
 
 - **Hero Model**: Landing page data (avatar, greeting, title, description, resumeLink)
 - **About Model**: Simplified to bio and summary only
 - **Endpoints**: Separate CRUD for better organization
 
-#### 2. **Multi-Category Tech Stack**
+#### 4. **Multi-Category Tech Stack**
 
 - **Before**: Single category per tech stack
 - **Now**: Multiple categories per tech stack (e.g., Next.js in both frontend & backend)
 - **Categories**: languages, frontend, backend, mobile, database, devops_cloud, tools
 - **Proficiency Level**: Optional 1-5 rating system
 
-#### 3. **Cascade Update System**
+#### 5. **Cascade Update System**
 
 - **Auto-sync**: When tech stack name/icon changes, all projects using it auto-update
 - **Format Support**: Both string arrays and object arrays in projects
 - **Performance**: Bulk MongoDB operations (not N+1 queries)
 
-#### 4. **Education with Attachments**
+#### 6. **Education with Attachments**
 
 - **Certificate Support**: Array of certificates/transcripts with ImageKit URLs
 - **Types**: formal, bootcamp, certification, course
 - **Attachments**: `{ title, url, fileId }` structure
 
-#### 5. **Reorder Endpoints**
+#### 7. **Reorder Endpoints**
 
 - **Entities**: Projects, Experiences, Tech Stacks, Educations
 - **Method**: PATCH `/api/{entity}/reorder`
 - **Implementation**: MongoDB bulkWrite for performance
 
-#### 6. **Vercel Deployment Ready**
+#### 8. **Vercel Deployment Ready**
 
 - **Serverless**: Configured for Vercel Functions
 - **Build**: TypeScript to JavaScript compilation
@@ -422,10 +448,9 @@ For complete testing examples and all endpoints, see the **[API Contract Documen
 
 ### **Frontend Repository**
 
-- **Location**: `D:\Coding\Next\Portofolio-Irpanzy`
 - **Framework**: Next.js
-- **Development**: `http://localhost:3001`
-- **Production**: `https://irfanmuria.vercel.app`
+- **Development**: `http://localhost:3000`
+- **Production**: `https://irpanzy.vercel.app`
 
 ### **API Integration Example**
 
