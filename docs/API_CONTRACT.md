@@ -765,6 +765,71 @@ Authorization: Bearer <admin_token>
 Content-Type: application/json
 ```
 
+**Request Body** (all fields optional):
+
+```json
+{
+  "institution": "Updated University",
+  "degree": "Updated Degree",
+  "location": "Updated Location",
+  "startDate": "2021-09-01",
+  "endDate": "2025-06-30",
+  "current": false,
+  "description": "Updated description",
+  "type": "formal",
+  "logo": "https://...",
+  "logoFileId": "abc123",
+  "attachments": [
+    {
+      "title": "Updated Certificate Title", // ✅ CAN EDIT TITLE
+      "url": "https://ik.imagekit.io/.../certificate.pdf",
+      "fileId": "xyz789"
+    }
+  ],
+  "order": 1
+}
+```
+
+**Example: Update Document Title Only**
+
+```json
+{
+  "attachments": [
+    {
+      "title": "Bachelor Degree Certificate", // ✅ Edit title here
+      "url": "https://ik.imagekit.io/.../cert.pdf",
+      "fileId": "abc123"
+    },
+    {
+      "title": "Academic Transcript", // ✅ Multiple documents
+      "url": "https://ik.imagekit.io/.../transcript.pdf",
+      "fileId": "xyz789"
+    }
+  ]
+}
+```
+
+**Response Success (200)**:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Education updated successfully",
+  "data": {
+    "_id": "674a1b2c3d4e5f6a7b8c9d30",
+    "institution": "Updated University",
+    "degree": "Updated Degree",
+    "attachments": [
+      {
+        "title": "Bachelor Degree Certificate",
+        "url": "https://...",
+        "fileId": "abc123"
+      }
+    ]
+  }
+}
+```
+
 ### **Delete Education (Soft Delete)**
 
 ```
@@ -1284,53 +1349,105 @@ Authorization: Bearer <admin_token>
 
 ## 📁 File Upload (ImageKit Integration)
 
-### **Upload Image/File**
+### **Upload File** (Images & PDF Documents) 📤
 
 ```
-POST /api/upload
+POST /api/upload/single
 Authorization: Bearer <admin_token>
 Content-Type: multipart/form-data
 ```
 
+**Description**: Universal upload endpoint - supports both **images and PDF documents**. Perfect for photos, certificates, transcripts!
+
+**Supported File Types**:
+
+- **Images**: JPG, JPEG, PNG, WebP, SVG, GIF
+- **Documents**: PDF, DOC, DOCX, TXT
+- **Max Size**: 10MB per file
+
 **Request Body (Form Data)**:
 
 - `file`: File to upload (required)
-- `folder`: Target folder in ImageKit (optional, default: "portfolio")
+- `folder`: Target folder in ImageKit (optional)
+  - Options: `PROJECTS`, `EXPERIENCES`, `EDUCATIONS`, `ABOUT`, `TECHSTACKS`, `SERVICES`, `DOCUMENTS`, `GENERAL`
 
-**cURL Example**:
+**cURL Examples**:
+
+**Upload Image**:
 
 ```bash
 curl -X POST \
   -H "Authorization: Bearer your_token" \
-  -F "file=@/path/to/image.jpg" \
-  -F "folder=projects" \
-  https://your-domain.com/api/upload
+  -F "file=@/path/to/photo.jpg" \
+  -F "folder=ABOUT" \
+  https://your-domain.com/api/upload/single
 ```
 
-**Response Success (200)**:
+**Upload PDF Certificate**:
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer your_token" \
+  -F "file=@/path/to/certificate.pdf" \
+  -F "folder=EDUCATIONS" \
+  https://your-domain.com/api/upload/single
+```
+
+**Response Success (201) - Image**:
 
 ```json
 {
-  "statusCode": 200,
-  "message": "File uploaded successfully",
+  "statusCode": 201,
+  "message": "Image uploaded successfully",
   "data": {
-    "fileId": "6748abc123def456",
-    "name": "image.jpg",
-    "url": "https://ik.imagekit.io/portfolio/projects/image.jpg",
-    "thumbnailUrl": "https://ik.imagekit.io/portfolio/projects/tr:w-300,h-300/image.jpg",
-    "filePath": "/projects/image.jpg",
+    "url": "https://ik.imagekit.io/portfolio/about/profile-photo.jpg",
+    "fileId": "abc123def456",
+    "name": "profile-photo.jpg",
     "size": 245760,
+    "folder": "/portfolio/about",
+    "originalName": "profile-photo.jpg",
+    "uploadedAt": "2024-12-01T10:00:00.000Z",
     "fileType": "image",
-    "mime": "image/jpeg"
+    "mimeType": "image/jpeg",
+    "previewUrl": "https://ik.imagekit.io/portfolio/about/profile-photo.jpg",
+    "isViewableInBrowser": true,
+    "isPDF": false
+  }
+}
+```
+
+**Response Success (201) - PDF Document**:
+
+```json
+{
+  "statusCode": 201,
+  "message": "Document uploaded successfully (application/pdf)",
+  "data": {
+    "url": "https://ik.imagekit.io/portfolio/educations/graduation-certificate.pdf",
+    "fileId": "xyz789ghi012",
+    "name": "graduation-certificate.pdf",
+    "size": 1245760,
+    "folder": "/portfolio/educations",
+    "originalName": "My Graduation Certificate.pdf",
+    "uploadedAt": "2024-12-01T10:00:00.000Z",
+    "fileType": "document",
+    "mimeType": "application/pdf",
+    "previewUrl": "https://ik.imagekit.io/portfolio/educations/graduation-certificate.pdf#view=FitH",
+    "isViewableInBrowser": true,
+    "isPDF": true
   }
 }
 ```
 
 **Supported File Types**:
 
-- **Images**: JPG, JPEG, PNG, GIF, WebP, SVG
-- **Documents**: PDF, DOC, DOCX, TXT
-- **Maximum Size**: 10MB per file
+- **Images**: JPG, JPEG, PNG, GIF, WebP, SVG (max 5MB each, 10MB for GIFs)
+- **Documents**: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, RTF (max 10MB for presentations/PDFs, 5MB for others)
+- **Special Features**:
+  - PDF documents get browser preview URL with `#view=FitH`
+  - Images automatically get thumbnail versions
+  - Documents include file type icons and descriptions
+  - Viewable documents can be previewed directly in browser
 
 ### **Delete File**
 
@@ -1529,11 +1646,21 @@ curl -X POST http://localhost:3000/api/chat \
 ### **File Upload**
 
 ```bash
-# Upload image file
-curl -X POST http://localhost:3000/api/upload \
+# Upload education certificate (PDF)
+curl -X POST http://localhost:3000/api/upload/education-document \
   -H "Authorization: Bearer $TOKEN" \
-  -F "file=@./project-screenshot.jpg" \
-  -F "folder=projects"
+  -F "document=@./certificate.pdf"
+
+# Upload education transcript (PDF)
+curl -X POST http://localhost:3000/api/upload/education-document \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "document=@./transcript.pdf"
+
+# Upload general image file
+curl -X POST http://localhost:3000/api/upload/single \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@./profile-image.jpg" \
+  -F "folder=ABOUT"
 ```
 
 ---
@@ -1673,8 +1800,9 @@ All CREATE, UPDATE, DELETE operations require JWT authentication:
 6. **Hero/About Separation**: Dedicated hero model for landing page data
 7. **AI Chat Integration**: Smart chatbot with context awareness
 8. **ImageKit Integration**: Advanced file upload with real-time transformations
-9. **Rate Limiting**: Protection against abuse and spam
-10. **Comprehensive Error Handling**: Detailed error messages and validation
+9. **PDF Upload Support**: Upload photos AND PDF documents in one unified endpoint
+10. **Rate Limiting**: Protection against abuse and spam
+11. **Comprehensive Error Handling**: Detailed error messages and validation
 
 ---
 
