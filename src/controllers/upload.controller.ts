@@ -2,11 +2,22 @@ import { Request, Response } from "express";
 import { imagekitService, UploadFolder } from "../services";
 import { asyncHandler, ApiResponse, ApiError } from "../utils";
 
+const getFileType = (mimeType: string): "image" | "document" => {
+  return mimeType.startsWith("image/") ? "image" : "document";
+};
+
+const generatePreviewUrl = (url: string, mimeType: string): string => {
+  if (mimeType === "application/pdf") {
+    return `${url}#view=FitH`;
+  }
+  return url;
+};
+
 export const uploadSingle = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.file) throw new ApiError(400, "No file uploaded");
 
-    const folderCategory = req.body.category as
+    const folderCategory = req.body.folder as
       keyof typeof UploadFolder | undefined;
     const folder =
       folderCategory && UploadFolder[folderCategory]
@@ -15,12 +26,28 @@ export const uploadSingle = asyncHandler(
 
     const result = await imagekitService.uploadFromMulter(req.file, folder);
 
-    res.status(201).json(
-      new ApiResponse(201, "File uploaded successfully", {
-        ...result,
-        folder,
-      })
-    );
+    const fileType = getFileType(req.file.mimetype);
+    const previewUrl = generatePreviewUrl(result.url, req.file.mimetype);
+
+    const enhancedResult = {
+      ...result,
+      folder,
+      originalName: req.file.originalname,
+      uploadedAt: new Date().toISOString(),
+      fileType,
+      mimeType: req.file.mimetype,
+      previewUrl: fileType === "document" ? previewUrl : result.url,
+      isViewableInBrowser:
+        req.file.mimetype === "application/pdf" || fileType === "image",
+      isPDF: req.file.mimetype === "application/pdf",
+    };
+
+    const message =
+      fileType === "document"
+        ? `Document uploaded successfully (${req.file.mimetype})`
+        : "Image uploaded successfully";
+
+    res.status(201).json(new ApiResponse(201, message, enhancedResult));
   }
 );
 
@@ -30,20 +57,41 @@ export const uploadMultiple = asyncHandler(
       throw new ApiError(400, "No files uploaded");
     }
 
-    const folderCategory = req.body.category as
+    const folderCategory = req.body.folder as
       keyof typeof UploadFolder | undefined;
     const folder =
       folderCategory && UploadFolder[folderCategory]
         ? UploadFolder[folderCategory]
         : UploadFolder.GENERAL;
 
-    const results = await imagekitService.uploadMultiple(req.files, folder);
+    const filesArray = req.files as Express.Multer.File[];
+    const results = await imagekitService.uploadMultiple(filesArray, folder);
 
-    res
-      .status(201)
-      .json(
-        new ApiResponse(201, "Files uploaded successfully", { results, folder })
-      );
+    const resultsWithMetadata = results.map((result, index) => {
+      const file = filesArray[index];
+      const fileType = getFileType(file.mimetype);
+      const previewUrl = generatePreviewUrl(result.url, file.mimetype);
+
+      return {
+        ...result,
+        originalName: file.originalname,
+        uploadedAt: new Date().toISOString(),
+        fileType,
+        mimeType: file.mimetype,
+        previewUrl: fileType === "document" ? previewUrl : result.url,
+        isViewableInBrowser:
+          file.mimetype === "application/pdf" || fileType === "image",
+        isPDF: file.mimetype === "application/pdf",
+      };
+    });
+
+    res.status(201).json(
+      new ApiResponse(201, "Files uploaded successfully", {
+        results: resultsWithMetadata,
+        folder,
+        totalFiles: results.length,
+      })
+    );
   }
 );
 

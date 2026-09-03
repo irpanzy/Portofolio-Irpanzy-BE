@@ -16,6 +16,11 @@ const fileFilter = (
     "image/png",
     "image/webp",
     "image/svg+xml",
+    "image/gif",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
   ];
 
   if (allowedMimes.includes(file.mimetype)) {
@@ -24,7 +29,7 @@ const fileFilter = (
     cb(
       new ApiError(
         400,
-        "Invalid file type. Only JPEG, PNG, WebP, and SVG are allowed."
+        `File type tidak didukung: ${file.mimetype}. Format yang diizinkan: Gambar (JPG, PNG, WebP, SVG, GIF) dan Dokumen (PDF, DOC, DOCX, TXT).`
       )
     );
   }
