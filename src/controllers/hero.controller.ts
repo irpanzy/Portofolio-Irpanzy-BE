@@ -9,7 +9,7 @@ import {
 } from "../validations/hero.validation";
 
 export const getHero = asyncHandler(async (req: Request, res: Response) => {
-  const hero = await Hero.findOne();
+  const hero = await Hero.findOne().lean();
 
   if (!hero) {
     throw new ApiError(404, "Hero data not found");

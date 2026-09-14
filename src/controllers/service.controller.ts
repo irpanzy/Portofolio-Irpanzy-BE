@@ -3,7 +3,9 @@ import { Service } from "../models";
 import { asyncHandler, ApiResponse, ApiError } from "../utils";
 
 export const getServices = asyncHandler(async (req: Request, res: Response) => {
-  const services = await Service.find({ deletedAt: null }).sort({ order: 1 });
+  const services = await Service.find({ deletedAt: null })
+    .sort({ order: 1 })
+    .lean();
   res.json(new ApiResponse(200, "Services retrieved", services));
 });
 
@@ -11,7 +13,7 @@ export const getService = asyncHandler(async (req: Request, res: Response) => {
   const service = await Service.findOne({
     _id: req.params.id,
     deletedAt: null,
-  });
+  }).lean();
   if (!service) throw new ApiError(404, "Service not found");
   res.json(new ApiResponse(200, "Service retrieved", service));
 });

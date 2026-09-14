@@ -1,4 +1,4 @@
-﻿import { Request, Response } from "express";
+import { Request, Response } from "express";
 import { TechStack, Project } from "../models";
 import { asyncHandler, ApiResponse, ApiError } from "../utils";
 
@@ -11,9 +11,11 @@ export const getTechStacks = asyncHandler(
       filter.categories = { $in: [category] };
     }
 
-    const techStacks = await TechStack.find(filter).sort({
-      order: 1,
-    });
+    const techStacks = await TechStack.find(filter)
+      .sort({
+        order: 1,
+      })
+      .lean();
     res.json(new ApiResponse(200, "Tech stacks retrieved", techStacks));
   }
 );
@@ -23,7 +25,7 @@ export const getTechStack = asyncHandler(
     const techStack = await TechStack.findOne({
       _id: req.params.id,
       deletedAt: null,
-    });
+    }).lean();
     if (!techStack) throw new ApiError(404, "Tech stack not found");
     res.json(new ApiResponse(200, "Tech stack retrieved", techStack));
   }

@@ -7,7 +7,7 @@ import {
 } from "../validations/about.validation";
 
 export const getAbout = asyncHandler(async (req: Request, res: Response) => {
-  const about = await About.findOne();
+  const about = await About.findOne().lean();
 
   if (!about) {
     throw new ApiError(404, "About data not found");

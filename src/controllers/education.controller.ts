@@ -10,10 +10,12 @@ import {
 
 export const getEducations = asyncHandler(
   async (req: Request, res: Response) => {
-    const educations = await Education.find({ deletedAt: null }).sort({
-      order: 1,
-      startDate: -1,
-    });
+    const educations = await Education.find({ deletedAt: null })
+      .sort({
+        order: 1,
+        startDate: -1,
+      })
+      .lean();
 
     res
       .status(200)
@@ -28,7 +30,7 @@ export const getEducation = asyncHandler(
     const education = await Education.findOne({
       _id: req.params.id,
       deletedAt: null,
-    });
+    }).lean();
 
     if (!education) {
       throw new ApiError(404, "Education not found");

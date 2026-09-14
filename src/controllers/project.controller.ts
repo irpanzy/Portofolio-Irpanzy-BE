@@ -5,7 +5,8 @@ import { asyncHandler, ApiResponse, ApiError } from "../utils";
 export const getProjects = asyncHandler(async (req: Request, res: Response) => {
   const projects = await Project.find({ deletedAt: null })
     .sort({ order: 1 })
-    .select("-deletedBy");
+    .select("-deletedBy")
+    .lean();
 
   res.json(new ApiResponse(200, "Projects retrieved successfully", projects));
 });
@@ -14,7 +15,7 @@ export const getProject = asyncHandler(async (req: Request, res: Response) => {
   const project = await Project.findOne({
     _id: req.params.id,
     deletedAt: null,
-  });
+  }).lean();
 
   if (!project) {
     throw new ApiError(404, "Project not found");

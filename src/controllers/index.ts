@@ -9,3 +9,4 @@ export * as techstackController from "./techstack.controller";
 export * as contactController from "./contact.controller";
 export * as chatController from "./chat.controller";
 export * as uploadController from "./upload.controller";
+export * as portfolioController from "./portfolio.controller";

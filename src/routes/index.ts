@@ -9,11 +9,14 @@ import { contactRouter } from "./contact.routes";
 import { chatRouter } from "./chat.routes";
 import { uploadRouter } from "./upload.routes";
 import { educationRouter } from "./education.routes";
+import { portfolioRouter } from "./portfolio.routes";
 import heroRouter from "./hero.routes";
 
 export const router = Router();
 
+router.use("/portfolio", portfolioRouter);
 router.use("/auth", authRouter);
+
 router.use("/hero", heroRouter);
 router.use("/projects", projectRouter);
 router.use("/experiences", experienceRouter);

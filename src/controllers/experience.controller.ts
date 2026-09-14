@@ -4,9 +4,11 @@ import { asyncHandler, ApiResponse, ApiError } from "../utils";
 
 export const getExperiences = asyncHandler(
   async (req: Request, res: Response) => {
-    const experiences = await Experience.find({ deletedAt: null }).sort({
-      order: 1,
-    });
+    const experiences = await Experience.find({ deletedAt: null })
+      .sort({
+        order: 1,
+      })
+      .lean();
     res.json(new ApiResponse(200, "Experiences retrieved", experiences));
   }
 );
@@ -16,7 +18,7 @@ export const getExperience = asyncHandler(
     const experience = await Experience.findOne({
       _id: req.params.id,
       deletedAt: null,
-    });
+    }).lean();
     if (!experience) throw new ApiError(404, "Experience not found");
     res.json(new ApiResponse(200, "Experience retrieved", experience));
   }
