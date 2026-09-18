@@ -14,6 +14,28 @@ import heroRouter from "./hero.routes";
 
 export const router = Router();
 
+router.get("/", (_req, res) => {
+  res.json({
+    status: "ok",
+    message: "Portfolio API",
+    version: "1.0.0",
+    endpoints: [
+      "/api/auth",
+      "/api/portfolio",
+      "/api/hero",
+      "/api/projects",
+      "/api/experiences",
+      "/api/educations",
+      "/api/services",
+      "/api/techstacks",
+      "/api/about",
+      "/api/contact",
+      "/api/chat",
+      "/api/upload",
+    ],
+  });
+});
+
 router.use("/portfolio", portfolioRouter);
 router.use("/auth", authRouter);
 
